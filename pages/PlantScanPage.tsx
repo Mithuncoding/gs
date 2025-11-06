@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ImageUploader from '../components/ImageUploader';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Card from '../components/Card';
@@ -20,6 +21,7 @@ const TRANSLATE_LANGS = [
 ];
 
 const PlantScanPage: React.FC = () => {
+  const navigate = useNavigate();
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [diagnosis, setDiagnosis] = useState<PlantDiagnosis | null>(null);
@@ -428,6 +430,18 @@ const PlantScanPage: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* AR Camera Button - Prominent at the top */}
+      <div className="mb-6 flex justify-center">
+        <button
+          onClick={() => navigate('/ar-scan')}
+          className="bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 hover:from-purple-700 hover:via-pink-700 hover:to-red-700 text-white px-8 py-4 rounded-2xl font-bold text-xl shadow-2xl hover:scale-105 transition-all flex items-center gap-4 border-4 border-purple-300 animate-pulse"
+        >
+          <span className="text-4xl">📱</span>
+          <span>{translate('arCameraDetection') || '🔴 AR LIVE CAMERA DETECTION'}</span>
+          <span className="text-4xl">🎯</span>
+        </button>
+      </div>
+      
       <h2 className="text-3xl font-bold text-green-700 mb-6 text-center capitalize">Plant Identifier</h2>
       <p className="text-gray-600 mb-8 text-center max-w-2xl mx-auto">
         {activeCategory === 'Unknown Plant' 

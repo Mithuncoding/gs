@@ -28,6 +28,7 @@ export const translations: LanguagePack = {
     navScanHistory: "Scan History",
     navCommunityHub: "GreenGram",
     navFarmerConnect: "Farmer Connect",
+    arCameraDetection: "🔴 AR LIVE CAMERA DETECTION",
 
     // Landing Page
     appCatchphrase: "Your intelligent partner for nurturing healthy plants. Leverage AI to diagnose, learn, and grow with confidence.",
@@ -275,6 +276,7 @@ export const translations: LanguagePack = {
     navScanHistory: "ಸ್ಕ್ಯಾನ್ ಇತಿಹಾಸ",
     navCommunityHub: "ಗ್ರೀನ್‌ಗ್ರಾಮ್",
     navFarmerConnect: "ರೈತ ಸಂಪರ್ಕ",
+    arCameraDetection: "🔴 AR ಲೈವ್ ಕ್ಯಾಮೆರಾ ಪತ್ತೆ",
 
     // Landing Page - ಮುಖಪುಟ
     appCatchphrase: "ಆರೋಗ್ಯಕರ ಸಸ್ಯಗಳನ್ನು ಪೋಷಿಸಲು ನಿಮ್ಮ ಬುದ್ಧಿವಂತ ಸಹಚರ. AI ಬಳಸಿ ರೋಗನಿರ್ಣಯ ಮಾಡಿ, ಕಲಿಯಿರಿ ಮತ್ತು ವಿಶ್ವಾಸದಿಂದ ಬೆಳೆಯಿರಿ.",
