@@ -330,34 +330,40 @@ Provide clear, actionable advice for farmers.`;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 pb-8">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white py-8 px-4 shadow-2xl">
+      {/* Hero Section - Matching PlantScan Theme */}
+      <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white py-12 px-4 shadow-2xl">
         <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-3 flex items-center justify-center gap-3">
-            <span className="text-5xl">📱</span>
+          <h1 className="text-5xl md:text-6xl font-bold mb-4 flex items-center justify-center gap-3 drop-shadow-lg">
+            <span className="text-6xl">📱</span>
             {language === 'kn' ? 'AR ಸಸ್ಯ ರೋಗ ಪತ್ತೆ' : 'AR Plant Disease Detection'}
-            <span className="text-5xl">🔍</span>
+            <span className="text-6xl">🔍</span>
           </h1>
-          <p className="text-lg md:text-xl opacity-95 max-w-3xl mx-auto">
+          <p className="text-xl md:text-2xl opacity-95 max-w-3xl mx-auto mb-6 font-medium">
             {language === 'kn' 
               ? 'ನೈಜ-ಸಮಯದ ಆಗ್ಮೆಂಟೆಡ್ ರಿಯಾಲಿಟಿ ರೋಗ ಪತ್ತೆ - ತ್ವರಿತ ರೋಗನಿರ್ಣಯಕ್ಕಾಗಿ ನಿಮ್ಮ ಕ್ಯಾಮೆರಾವನ್ನು ಬೆಳೆಗಳ ಮೇಲೆ ತೋರಿಸಿ'
               : 'Real-Time Augmented Reality Disease Detection - Point your camera at crops for instant diagnosis'
             }
           </p>
-          <div className="mt-4 flex flex-wrap justify-center gap-3 text-sm">
-            <span className="bg-red-500/80 px-3 py-1 rounded-full">
-              🔴 {language === 'kn' ? 'ರೋಗಗ್ರಸ್ತ' : 'Diseased'}
-            </span>
-            <span className="bg-yellow-500/80 px-3 py-1 rounded-full">
-              🟡 {language === 'kn' ? 'ಮಧ್ಯಮ' : 'Moderate'}
-            </span>
-            <span className="bg-green-500/80 px-3 py-1 rounded-full">
-              🟢 {language === 'kn' ? 'ಆರೋಗ್ಯಕರ' : 'Healthy'}
-            </span>
+          
+          {/* Detection Legend */}
+          <div className="mt-6 flex flex-wrap justify-center gap-4 text-base">
+            <div className="bg-white/20 backdrop-blur-md px-5 py-3 rounded-full flex items-center gap-3 border-2 border-red-300">
+              <div className="w-4 h-4 bg-red-500 rounded-full animate-pulse"></div>
+              <span className="font-bold">{language === 'kn' ? 'ರೋಗಗ್ರಸ್ತ' : 'Severely Diseased'}</span>
+            </div>
+            <div className="bg-white/20 backdrop-blur-md px-5 py-3 rounded-full flex items-center gap-3 border-2 border-yellow-300">
+              <div className="w-4 h-4 bg-yellow-500 rounded-full animate-pulse"></div>
+              <span className="font-bold">{language === 'kn' ? 'ಮಧ್ಯಮ' : 'Moderate Concern'}</span>
+            </div>
+            <div className="bg-white/20 backdrop-blur-md px-5 py-3 rounded-full flex items-center gap-3 border-2 border-green-300">
+              <div className="w-4 h-4 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="font-bold">{language === 'kn' ? 'ಆರೋಗ್ಯಕರ' : 'Healthy'}</span>
+            </div>
             {isOffline && (
-              <span className="bg-amber-500/80 px-3 py-1 rounded-full">
-                📴 {language === 'kn' ? 'ಆಫ್‌ಲೈನ್ ಮೋಡ್' : 'Offline Mode'}
-              </span>
+              <div className="bg-amber-500/90 px-5 py-3 rounded-full flex items-center gap-2 border-2 border-amber-600 animate-bounce">
+                <span className="text-xl">📴</span>
+                <span className="font-bold">{language === 'kn' ? 'ಆಫ್‌ಲೈನ್ ಮೋಡ್' : 'Offline Mode'}</span>
+              </div>
             )}
           </div>
         </div>
@@ -366,13 +372,24 @@ Provide clear, actionable advice for farmers.`;
       <div className="max-w-7xl mx-auto px-4 mt-8">
         <div className="grid lg:grid-cols-2 gap-6">
           {/* Camera Section */}
-          <Card className="bg-white/90 backdrop-blur">
-            <h2 className="text-2xl font-bold text-green-700 mb-4">
-              📹 {language === 'kn' ? 'ಲೈವ್ ಕ್ಯಾಮೆರಾ ಸ್ಕ್ಯಾನ್' : 'Live Camera Scan'}
-            </h2>
+          <Card className="bg-white/95 backdrop-blur-sm shadow-2xl border-2 border-green-200">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-3xl font-bold text-green-700 flex items-center gap-3">
+                <span className="text-4xl">📹</span>
+                {language === 'kn' ? 'ಲೈವ್ ಕ್ಯಾಮೆರಾ ಸ್ಕ್ಯಾನ್' : 'Live Camera Scan'}
+              </h2>
+              {isCameraActive && (
+                <div className="flex items-center gap-2 bg-green-100 px-4 py-2 rounded-full border-2 border-green-500">
+                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-green-700 font-bold text-sm">
+                    {language === 'kn' ? 'ಸಕ್ರಿಯ' : 'ACTIVE'}
+                  </span>
+                </div>
+              )}
+            </div>
             
-            {/* Video Container */}
-            <div className="relative bg-black rounded-xl overflow-hidden aspect-video mb-4">
+            {/* Video Container with Enhanced UI */}
+            <div className="relative bg-gradient-to-br from-gray-900 to-black rounded-2xl overflow-hidden aspect-video mb-6 shadow-2xl border-4 border-green-500">
               <video
                 ref={videoRef}
                 autoPlay
@@ -385,194 +402,393 @@ Provide clear, actionable advice for farmers.`;
                 className="absolute top-0 left-0 w-full h-full pointer-events-none"
               />
               
-              {/* Overlay Stats */}
-              {isCameraActive && (
-                <div className="absolute top-2 left-2 bg-black/70 text-white px-3 py-1 rounded-lg text-sm">
-                  {isScanning ? '🔴 Live' : '⏸️ Paused'} | 
-                  {detections.length} {language === 'kn' ? 'ಪತ್ತೆಗಳು' : 'detections'}
+              {/* Camera Inactive Overlay */}
+              {!isCameraActive && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-white bg-gradient-to-br from-green-900/90 to-emerald-900/90 backdrop-blur-sm">
+                  <div className="text-8xl mb-4 animate-bounce">📷</div>
+                  <h3 className="text-3xl font-bold mb-2">
+                    {language === 'kn' ? 'ಕ್ಯಾಮೆರಾ ಸಿದ್ಧವಾಗಿದೆ' : 'Camera Ready'}
+                  </h3>
+                  <p className="text-xl opacity-90 text-center px-4">
+                    {language === 'kn' 
+                      ? 'ಪ್ರಾರಂಭಿಸಲು ಕೆಳಗಿನ ಬಟನ್ ಕ್ಲಿಕ್ ಮಾಡಿ'
+                      : 'Click button below to start scanning'
+                    }
+                  </p>
                 </div>
               )}
               
-              {/* Detection Legend */}
+              {/* Live Status Indicator */}
+              {isCameraActive && (
+                <div className="absolute top-4 left-4 flex items-center gap-3">
+                  <div className={`${isScanning ? 'bg-red-500' : 'bg-orange-500'} px-4 py-2 rounded-full text-white font-bold text-sm shadow-lg border-2 border-white flex items-center gap-2`}>
+                    <div className={`w-3 h-3 ${isScanning ? 'bg-white' : 'bg-yellow-300'} rounded-full ${isScanning ? 'animate-pulse' : ''}`}></div>
+                    {isScanning ? (language === 'kn' ? 'ಲೈವ್ ಸ್ಕ್ಯಾನಿಂಗ್' : 'LIVE SCANNING') : (language === 'kn' ? 'ವಿರಾಮ' : 'PAUSED')}
+                  </div>
+                  <div className="bg-blue-500/90 px-4 py-2 rounded-full text-white font-bold text-sm shadow-lg border-2 border-white">
+                    {detections.length} {language === 'kn' ? 'ಪತ್ತೆಗಳು' : 'Detections'}
+                  </div>
+                </div>
+              )}
+              
+              {/* Real-Time Detection Stats - Enhanced */}
               {detections.length > 0 && (
-                <div className="absolute bottom-2 right-2 bg-black/70 text-white px-3 py-2 rounded-lg text-xs space-y-1">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-red-500 rounded"></div>
-                    <span>{detections.filter(d => d.severity === 'diseased').length} {language === 'kn' ? 'ರೋಗಗ್ರಸ್ತ' : 'Diseased'}</span>
+                <div className="absolute bottom-4 right-4 bg-black/85 backdrop-blur-md text-white px-4 py-3 rounded-xl shadow-2xl border-2 border-white/30">
+                  <div className="text-xs font-bold mb-2 text-center opacity-75">
+                    {language === 'kn' ? 'ನೈಜ-ಸಮಯದ ಪತ್ತೆಗಳು' : 'REAL-TIME DETECTIONS'}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-yellow-500 rounded"></div>
-                    <span>{detections.filter(d => d.severity === 'moderate').length} {language === 'kn' ? 'ಮಧ್ಯಮ' : 'Moderate'}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-green-500 rounded"></div>
-                    <span>{detections.filter(d => d.severity === 'healthy').length} {language === 'kn' ? 'ಆರೋಗ್ಯಕರ' : 'Healthy'}</span>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-red-500 rounded shadow-lg"></div>
+                        <span className="text-sm font-semibold">{language === 'kn' ? 'ರೋಗಗ್ರಸ್ತ' : 'Diseased'}</span>
+                      </div>
+                      <span className="text-lg font-bold bg-red-500 px-3 py-1 rounded-full">
+                        {detections.filter(d => d.severity === 'diseased').length}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-yellow-500 rounded shadow-lg"></div>
+                        <span className="text-sm font-semibold">{language === 'kn' ? 'ಮಧ್ಯಮ' : 'Moderate'}</span>
+                      </div>
+                      <span className="text-lg font-bold bg-yellow-500 px-3 py-1 rounded-full text-black">
+                        {detections.filter(d => d.severity === 'moderate').length}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-green-500 rounded shadow-lg"></div>
+                        <span className="text-sm font-semibold">{language === 'kn' ? 'ಆರೋಗ್ಯಕರ' : 'Healthy'}</span>
+                      </div>
+                      <span className="text-lg font-bold bg-green-500 px-3 py-1 rounded-full">
+                        {detections.filter(d => d.severity === 'healthy').length}
+                      </span>
+                    </div>
                   </div>
                 </div>
               )}
             </div>
             
-            {/* Controls */}
-            <div className="flex flex-wrap gap-3">
+            {/* Enhanced Camera Controls */}
+            <div className="space-y-4">
               {!isCameraActive ? (
                 <button
                   onClick={startCamera}
-                  className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-3 rounded-xl font-bold hover:scale-105 transition-transform shadow-lg flex items-center justify-center gap-2"
+                  className="w-full bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 hover:from-green-700 hover:via-emerald-700 hover:to-teal-700 text-white px-8 py-5 rounded-2xl font-bold text-xl hover:scale-105 transition-all shadow-2xl flex items-center justify-center gap-4 border-4 border-green-300"
                 >
-                  <span className="text-2xl">📷</span>
-                  {language === 'kn' ? 'ಕ್ಯಾಮೆರಾ ಪ್ರಾರಂಭಿಸಿ' : 'Start Camera'}
+                  <span className="text-4xl animate-bounce">📷</span>
+                  <span>{language === 'kn' ? 'ಕ್ಯಾಮೆರಾ ಪ್ರಾರಂಭಿಸಿ' : 'START CAMERA'}</span>
+                  <span className="text-4xl animate-bounce">▶️</span>
                 </button>
               ) : (
-                <>
+                <div className="grid grid-cols-2 gap-4">
                   <button
                     onClick={() => setIsScanning(!isScanning)}
-                    className={`flex-1 ${isScanning ? 'bg-gradient-to-r from-orange-500 to-red-500' : 'bg-gradient-to-r from-green-600 to-emerald-600'} text-white px-6 py-3 rounded-xl font-bold hover:scale-105 transition-transform shadow-lg flex items-center justify-center gap-2`}
+                    className={`${
+                      isScanning 
+                        ? 'bg-gradient-to-r from-orange-500 via-red-500 to-red-600 hover:from-orange-600 hover:via-red-600 hover:to-red-700' 
+                        : 'bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 hover:from-green-700 hover:via-emerald-700 hover:to-teal-700'
+                    } text-white px-6 py-4 rounded-2xl font-bold text-lg hover:scale-105 transition-all shadow-2xl flex items-center justify-center gap-3 border-4 ${
+                      isScanning ? 'border-orange-300' : 'border-green-300'
+                    }`}
                   >
-                    <span className="text-2xl">{isScanning ? '⏸️' : '▶️'}</span>
-                    {isScanning 
-                      ? (language === 'kn' ? 'ವಿರಾಮಗೊಳಿಸಿ' : 'Pause Scan')
-                      : (language === 'kn' ? 'ಸ್ಕ್ಯಾನ್ ಪ್ರಾರಂಭಿಸಿ' : 'Start Scan')
-                    }
+                    <span className="text-3xl">{isScanning ? '⏸️' : '▶️'}</span>
+                    <span>
+                      {isScanning 
+                        ? (language === 'kn' ? 'ವಿರಾಮ' : 'PAUSE')
+                        : (language === 'kn' ? 'ಸ್ಕ್ಯಾನ್' : 'SCAN')
+                      }
+                    </span>
                   </button>
+                  
                   <button
                     onClick={stopCamera}
-                    className="bg-gradient-to-r from-gray-600 to-gray-700 text-white px-6 py-3 rounded-xl font-bold hover:scale-105 transition-transform shadow-lg flex items-center justify-center gap-2"
+                    className="bg-gradient-to-r from-gray-600 via-gray-700 to-gray-800 hover:from-gray-700 hover:via-gray-800 hover:to-gray-900 text-white px-6 py-4 rounded-2xl font-bold text-lg hover:scale-105 transition-all shadow-2xl flex items-center justify-center gap-3 border-4 border-gray-400"
                   >
-                    <span className="text-2xl">⏹️</span>
-                    {language === 'kn' ? 'ನಿಲ್ಲಿಸಿ' : 'Stop'}
+                    <span className="text-3xl">⏹️</span>
+                    <span>{language === 'kn' ? 'ನಿಲ್ಲಿಸಿ' : 'STOP'}</span>
                   </button>
-                </>
+                </div>
+              )}
+              
+              {/* AI Analysis Button - Enhanced */}
+              {isCameraActive && (
+                <button
+                  onClick={captureAndAnalyze}
+                  disabled={isAnalyzing || isOffline}
+                  className={`w-full ${
+                    isOffline 
+                      ? 'bg-gray-400 cursor-not-allowed' 
+                      : 'bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700'
+                  } text-white px-8 py-5 rounded-2xl font-bold text-xl hover:scale-105 transition-all shadow-2xl flex items-center justify-center gap-4 disabled:opacity-50 disabled:hover:scale-100 border-4 ${
+                    isOffline ? 'border-gray-500' : 'border-purple-300'
+                  }`}
+                >
+                  <span className="text-4xl">{isAnalyzing ? '⚙️' : '🤖'}</span>
+                  <span>
+                    {isAnalyzing 
+                      ? (language === 'kn' ? 'AI ವಿಶ್ಲೇಷಿಸುತ್ತಿದೆ...' : 'AI ANALYZING...')
+                      : (language === 'kn' ? 'AI ವಿವರವಾದ ವಿಶ್ಲೇಷಣೆ' : 'GET AI DETAILED ANALYSIS')
+                    }
+                  </span>
+                  <span className="text-4xl">{isAnalyzing ? '⚙️' : '🧠'}</span>
+                </button>
+              )}
+              
+              {/* Status Messages */}
+              {isOffline && isCameraActive && (
+                <div className="bg-amber-50 border-3 border-amber-400 rounded-xl p-4 flex items-center gap-3">
+                  <span className="text-3xl">⚠️</span>
+                  <div className="flex-1">
+                    <p className="text-amber-800 font-bold">
+                      {language === 'kn' ? 'ಆಫ್‌ಲೈನ್ ಮೋಡ್' : 'Offline Mode'}
+                    </p>
+                    <p className="text-amber-700 text-sm">
+                      {language === 'kn' 
+                        ? 'AI ವಿಶ್ಲೇಷಣೆಗೆ ಇಂಟರ್ನೆಟ್ ಸಂಪರ್ಕ ಅಗತ್ಯವಿದೆ. ಮೂಲಭೂತ ಪತ್ತೆ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತಿದೆ.'
+                        : 'AI analysis requires internet. Basic detection is working.'
+                      }
+                    </p>
+                  </div>
+                </div>
+              )}
+              
+              {error && (
+                <div className="bg-red-50 border-3 border-red-400 rounded-xl p-4 flex items-start gap-3">
+                  <span className="text-3xl">❌</span>
+                  <div className="flex-1">
+                    <p className="font-bold text-red-800 text-lg mb-1">
+                      {language === 'kn' ? 'ದೋಷ' : 'Error'}
+                    </p>
+                    <p className="text-red-700">{error}</p>
+                  </div>
+                </div>
               )}
             </div>
-            
-            {/* AI Analysis Button */}
-            {isCameraActive && (
-              <button
-                onClick={captureAndAnalyze}
-                disabled={isAnalyzing || isOffline}
-                className={`w-full mt-3 ${isOffline ? 'bg-gray-400' : 'bg-gradient-to-r from-blue-600 to-purple-600'} text-white px-6 py-4 rounded-xl font-bold hover:scale-105 transition-transform shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed`}
-              >
-                <span className="text-2xl">🤖</span>
-                {isAnalyzing 
-                  ? (language === 'kn' ? 'AI ವಿಶ್ಲೇಷಿಸುತ್ತಿದೆ...' : 'AI Analyzing...')
-                  : (language === 'kn' ? 'AI ವಿವರವಾದ ವಿಶ್ಲೇಷಣೆ' : 'Get AI Detailed Analysis')
-                }
-              </button>
-            )}
-            
-            {isOffline && (
-              <p className="text-amber-600 text-sm mt-2 text-center">
-                ⚠️ {language === 'kn' 
-                  ? 'AI ವಿಶ್ಲೇಷಣೆಗೆ ಇಂಟರ್ನೆಟ್ ಸಂಪರ್ಕ ಅಗತ್ಯವಿದೆ'
-                  : 'AI analysis requires internet connection'
-                }
-              </p>
-            )}
-            
-            {error && (
-              <div className="mt-4 bg-red-100 border-2 border-red-400 text-red-700 px-4 py-3 rounded-xl">
-                <p className="font-bold">⚠️ {language === 'kn' ? 'ದೋಷ' : 'Error'}</p>
-                <p className="text-sm">{error}</p>
-              </div>
-            )}
           </Card>
 
-          {/* Results Section */}
-          <Card className="bg-white/90 backdrop-blur">
-            <h2 className="text-2xl font-bold text-green-700 mb-4">
-              📊 {language === 'kn' ? 'ಪತ್ತೆ ಫಲಿತಾಂಶಗಳು' : 'Detection Results'}
+          {/* Results Section - Enhanced */}
+          <Card className="bg-white/95 backdrop-blur-sm shadow-2xl border-2 border-blue-200">
+            <h2 className="text-3xl font-bold text-blue-700 mb-6 flex items-center gap-3">
+              <span className="text-4xl">📊</span>
+              {language === 'kn' ? 'ಪತ್ತೆ ಫಲಿತಾಂಶಗಳು' : 'Detection Results'}
             </h2>
             
-            {/* Real-time Stats */}
-            <div className="grid grid-cols-3 gap-3 mb-6">
-              <div className="bg-red-50 border-2 border-red-300 rounded-xl p-3 text-center">
-                <div className="text-3xl font-bold text-red-600">
+            {/* Real-time Stats - Enhanced Grid */}
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="bg-gradient-to-br from-red-50 to-red-100 border-3 border-red-400 rounded-2xl p-5 text-center transform hover:scale-105 transition-all shadow-lg">
+                <div className="text-5xl font-bold text-red-600 mb-2">
                   {detections.filter(d => d.severity === 'diseased').length}
                 </div>
-                <div className="text-sm text-red-700">
-                  {language === 'kn' ? 'ರೋಗಗ್ರಸ್ತ' : 'Diseased'}
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                  <div className="text-sm font-bold text-red-700">
+                    {language === 'kn' ? 'ರೋಗಗ್ರಸ್ತ' : 'Diseased'}
+                  </div>
                 </div>
+                {detections.filter(d => d.severity === 'diseased').length > 0 && (
+                  <div className="mt-2 text-xs text-red-600 font-semibold">
+                    ⚠️ {language === 'kn' ? 'ಗಮನ ಬೇಕು' : 'Needs Attention'}
+                  </div>
+                )}
               </div>
-              <div className="bg-yellow-50 border-2 border-yellow-300 rounded-xl p-3 text-center">
-                <div className="text-3xl font-bold text-yellow-600">
+              
+              <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-3 border-yellow-400 rounded-2xl p-5 text-center transform hover:scale-105 transition-all shadow-lg">
+                <div className="text-5xl font-bold text-yellow-600 mb-2">
                   {detections.filter(d => d.severity === 'moderate').length}
                 </div>
-                <div className="text-sm text-yellow-700">
-                  {language === 'kn' ? 'ಮಧ್ಯಮ' : 'Moderate'}
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                  <div className="text-sm font-bold text-yellow-700">
+                    {language === 'kn' ? 'ಮಧ್ಯಮ' : 'Moderate'}
+                  </div>
                 </div>
+                {detections.filter(d => d.severity === 'moderate').length > 0 && (
+                  <div className="mt-2 text-xs text-yellow-600 font-semibold">
+                    👁️ {language === 'kn' ? 'ಮೇಲ್ವಿಚಾರಣೆ' : 'Monitor'}
+                  </div>
+                )}
               </div>
-              <div className="bg-green-50 border-2 border-green-300 rounded-xl p-3 text-center">
-                <div className="text-3xl font-bold text-green-600">
+              
+              <div className="bg-gradient-to-br from-green-50 to-green-100 border-3 border-green-400 rounded-2xl p-5 text-center transform hover:scale-105 transition-all shadow-lg">
+                <div className="text-5xl font-bold text-green-600 mb-2">
                   {detections.filter(d => d.severity === 'healthy').length}
                 </div>
-                <div className="text-sm text-green-700">
-                  {language === 'kn' ? 'ಆರೋಗ್ಯಕರ' : 'Healthy'}
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <div className="text-sm font-bold text-green-700">
+                    {language === 'kn' ? 'ಆರೋಗ್ಯಕರ' : 'Healthy'}
+                  </div>
                 </div>
+                {detections.filter(d => d.severity === 'healthy').length > 0 && (
+                  <div className="mt-2 text-xs text-green-600 font-semibold">
+                    ✅ {language === 'kn' ? 'ಉತ್ತಮ' : 'Good'}
+                  </div>
+                )}
               </div>
             </div>
             
-            {/* AI Diagnosis */}
+            {/* AI Diagnosis - Enhanced */}
             {diagnosis && (
-              <div className="mb-4">
-                <h3 className="text-lg font-bold text-gray-800 mb-2 flex items-center gap-2">
-                  <span className="text-2xl">🤖</span>
-                  {language === 'kn' ? 'AI ರೋಗನಿರ್ಣಯ' : 'AI Diagnosis'}
-                </h3>
-                <div className="bg-blue-50 border-2 border-blue-300 rounded-xl p-4">
-                  <p className="text-gray-700 whitespace-pre-wrap">{diagnosis}</p>
+              <div className="mb-6 animate-fade-in">
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-3 border-blue-400 rounded-2xl p-6 shadow-lg">
+                  <h3 className="text-xl font-bold text-blue-800 mb-4 flex items-center gap-3">
+                    <span className="text-3xl">🤖</span>
+                    {language === 'kn' ? 'AI ರೋಗನಿರ್ಣಯ' : 'AI Diagnosis'}
+                    <span className="ml-auto bg-blue-500 text-white px-3 py-1 rounded-full text-xs">
+                      {language === 'kn' ? 'ತಜ್ಞರ ವಿಶ್ಲೇಷಣೆ' : 'Expert Analysis'}
+                    </span>
+                  </h3>
+                  <p className="text-gray-800 whitespace-pre-wrap leading-relaxed text-lg">
+                    {diagnosis}
+                  </p>
                 </div>
               </div>
             )}
             
-            {/* Treatment Recommendations */}
+            {/* Treatment Recommendations - Enhanced */}
             {treatment && (
-              <div>
-                <h3 className="text-lg font-bold text-gray-800 mb-2 flex items-center gap-2">
-                  <span className="text-2xl">💊</span>
-                  {language === 'kn' ? 'ಚಿಕಿತ್ಸೆ ಸಲಹೆಗಳು' : 'Treatment Recommendations'}
-                </h3>
-                <div className="bg-green-50 border-2 border-green-300 rounded-xl p-4">
-                  <p className="text-gray-700 whitespace-pre-wrap">{treatment}</p>
+              <div className="mb-6 animate-fade-in">
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-3 border-green-400 rounded-2xl p-6 shadow-lg">
+                  <h3 className="text-xl font-bold text-green-800 mb-4 flex items-center gap-3">
+                    <span className="text-3xl">💊</span>
+                    {language === 'kn' ? 'ಚಿಕಿತ್ಸೆ ಸಲಹೆಗಳು' : 'Treatment Recommendations'}
+                    <span className="ml-auto bg-green-500 text-white px-3 py-1 rounded-full text-xs">
+                      {language === 'kn' ? 'ಕ್ರಿಯಾಶೀಲ ಸಲಹೆ' : 'Actionable Advice'}
+                    </span>
+                  </h3>
+                  <p className="text-gray-800 whitespace-pre-wrap leading-relaxed text-lg">
+                    {treatment}
+                  </p>
                 </div>
               </div>
             )}
             
-            {/* Instructions */}
+            {/* Instructions - Enhanced */}
             {!diagnosis && !treatment && (
-              <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-300 rounded-xl p-6">
-                <h3 className="text-lg font-bold text-blue-700 mb-3">
-                  📖 {language === 'kn' ? 'ಹೇಗೆ ಬಳಸುವುದು' : 'How to Use'}
+              <div className="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 border-3 border-blue-400 rounded-2xl p-8 shadow-lg">
+                <h3 className="text-2xl font-bold text-blue-800 mb-6 flex items-center gap-3">
+                  <span className="text-4xl">📖</span>
+                  {language === 'kn' ? 'ಹೇಗೆ ಬಳಸುವುದು' : 'How to Use AR Detection'}
                 </h3>
-                <ol className="space-y-2 text-gray-700">
-                  <li className="flex items-start gap-2">
-                    <span className="font-bold">1️⃣</span>
-                    <span>{language === 'kn' 
-                      ? 'ಕ್ಯಾಮೆರಾ ಪ್ರಾರಂಭಿಸಿ ಮತ್ತು ನಿಮ್ಮ ಬೆಳೆಯ ಎಲೆಯತ್ತ ತೋರಿಸಿ'
-                      : 'Start camera and point at your crop leaf'
-                    }</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="font-bold">2️⃣</span>
-                    <span>{language === 'kn' 
-                      ? 'ನೈಜ-ಸಮಯದ ಪತ್ತೆಗಾಗಿ "ಸ್ಕ್ಯಾನ್ ಪ್ರಾರಂಭಿಸಿ" ಕ್ಲಿಕ್ ಮಾಡಿ'
-                      : 'Click "Start Scan" for real-time detection'
-                    }</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="font-bold">3️⃣</span>
-                    <span>{language === 'kn' 
-                      ? 'ಬಣ್ಣದ ಪೆಟ್ಟಿಗೆಗಳನ್ನು ವೀಕ್ಷಿಸಿ: 🔴 ರೋಗಗ್ರಸ್ತ, 🟡 ಮಧ್ಯಮ, 🟢 ಆರೋಗ್ಯಕರ'
-                      : 'Watch colored boxes: 🔴 Diseased, 🟡 Moderate, 🟢 Healthy'
-                    }</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="font-bold">4️⃣</span>
-                    <span>{language === 'kn' 
-                      ? 'ವಿವರವಾದ ವಿಶ್ಲೇಷಣೆ ಮತ್ತು ಚಿಕಿತ್ಸೆ ಸಲಹೆಗಳಿಗಾಗಿ AI ಬಟನ್ ಬಳಸಿ'
-                      : 'Use AI button for detailed analysis and treatment advice'
-                    }</span>
-                  </li>
-                </ol>
+                
+                <div className="space-y-5">
+                  <div className="flex items-start gap-4 bg-white/70 rounded-xl p-4 border-2 border-blue-200">
+                    <span className="text-4xl flex-shrink-0">1️⃣</span>
+                    <div className="flex-1">
+                      <h4 className="font-bold text-gray-800 mb-1 text-lg">
+                        {language === 'kn' ? 'ಕ್ಯಾಮೆರಾ ಪ್ರಾರಂಭಿಸಿ' : 'Start Camera'}
+                      </h4>
+                      <p className="text-gray-700">
+                        {language === 'kn' 
+                          ? '"📷 ಕ್ಯಾಮೆರಾ ಪ್ರಾರಂಭಿಸಿ" ಬಟನ್ ಕ್ಲಿಕ್ ಮಾಡಿ ಮತ್ತು ಕ್ಯಾಮೆರಾ ಅನುಮತಿಗಳನ್ನು ನೀಡಿ'
+                          : 'Click "📷 START CAMERA" and grant camera permissions'
+                        }
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-4 bg-white/70 rounded-xl p-4 border-2 border-green-200">
+                    <span className="text-4xl flex-shrink-0">2️⃣</span>
+                    <div className="flex-1">
+                      <h4 className="font-bold text-gray-800 mb-1 text-lg">
+                        {language === 'kn' ? 'ಸ್ಕ್ಯಾನಿಂಗ್ ಸಕ್ರಿಯಗೊಳಿಸಿ' : 'Enable Scanning'}
+                      </h4>
+                      <p className="text-gray-700">
+                        {language === 'kn' 
+                          ? 'ನೈಜ-ಸಮಯದ ಪತ್ತೆಗಾಗಿ "▶️ ಸ್ಕ್ಯಾನ್" ಬಟನ್ ಒತ್ತಿ'
+                          : 'Press "▶️ SCAN" button to activate real-time detection'
+                        }
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-4 bg-white/70 rounded-xl p-4 border-2 border-purple-200">
+                    <span className="text-4xl flex-shrink-0">3️⃣</span>
+                    <div className="flex-1">
+                      <h4 className="font-bold text-gray-800 mb-1 text-lg">
+                        {language === 'kn' ? 'ಎಲೆಯತ್ತ ತೋರಿಸಿ' : 'Point at Leaf'}
+                      </h4>
+                      <p className="text-gray-700">
+                        {language === 'kn' 
+                          ? 'ಸಸ್ಯದ ಎಲೆಯತ್ತ ಕ್ಯಾಮೆರಾವನ್ನು ತೋರಿಸಿ ಮತ್ತು 2-3 ಸೆಕೆಂಡುಗಳ ಕಾಲ ಸ್ಥಿರವಾಗಿ ಹಿಡಿದುಕೊಳ್ಳಿ'
+                          : 'Point camera at plant leaf and hold steady for 2-3 seconds'
+                        }
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-4 bg-white/70 rounded-xl p-4 border-2 border-red-200">
+                    <span className="text-4xl flex-shrink-0">4️⃣</span>
+                    <div className="flex-1">
+                      <h4 className="font-bold text-gray-800 mb-1 text-lg">
+                        {language === 'kn' ? 'ಬಣ್ಣದ ಪೆಟ್ಟಿಗೆಗಳನ್ನು ವೀಕ್ಷಿಸಿ' : 'Watch Color Boxes'}
+                      </h4>
+                      <div className="text-gray-700 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 bg-red-500 rounded"></div>
+                          <span className="font-semibold">
+                            🔴 {language === 'kn' ? 'ಕೆಂಪು = ರೋಗಗ್ರಸ್ತ (>70%)' : 'Red = Severely Diseased (>70%)'}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 bg-yellow-500 rounded"></div>
+                          <span className="font-semibold">
+                            🟡 {language === 'kn' ? 'ಹಳದಿ = ಮಧ್ಯಮ (40-70%)' : 'Yellow = Moderate (40-70%)'}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 bg-green-500 rounded"></div>
+                          <span className="font-semibold">
+                            🟢 {language === 'kn' ? 'ಹಸಿರು = ಆರೋಗ್ಯಕರ (<40%)' : 'Green = Healthy (<40%)'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-4 bg-white/70 rounded-xl p-4 border-2 border-pink-200">
+                    <span className="text-4xl flex-shrink-0">5️⃣</span>
+                    <div className="flex-1">
+                      <h4 className="font-bold text-gray-800 mb-1 text-lg">
+                        {language === 'kn' ? 'AI ವಿಶ್ಲೇಷಣೆ ಪಡೆಯಿರಿ' : 'Get AI Analysis'}
+                      </h4>
+                      <p className="text-gray-700">
+                        {language === 'kn' 
+                          ? 'ವಿವರವಾದ ರೋಗನಿರ್ಣಯ ಮತ್ತು ಚಿಕಿತ್ಸೆ ಸಲಹೆಗಳಿಗಾಗಿ "🤖 AI ವಿವರವಾದ ವಿಶ್ಲೇಷಣೆ" ಬಳಸಿ'
+                          : 'Use "🤖 GET AI DETAILED ANALYSIS" for detailed diagnosis and treatment advice'
+                        }
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Pro Tips */}
+                <div className="mt-6 pt-6 border-t-2 border-blue-300">
+                  <h4 className="font-bold text-blue-800 mb-3 flex items-center gap-2">
+                    <span className="text-2xl">💡</span>
+                    {language === 'kn' ? 'ಉತ್ತಮ ಫಲಿತಾಂಶಗಳಿಗಾಗಿ ಸಲಹೆಗಳು' : 'Pro Tips for Best Results'}
+                  </h4>
+                  <ul className="space-y-2 text-gray-700">
+                    <li className="flex items-start gap-2">
+                      <span>✅</span>
+                      <span>{language === 'kn' ? 'ಪ್ರಕಾಶಮಾನವಾದ ಹಗಲು ಬೆಳಕನ್ನು ಬಳಸಿ' : 'Use bright daylight for best detection'}</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span>✅</span>
+                      <span>{language === 'kn' ? 'ಎಲೆಯಿಂದ 15-30 cm ದೂರವನ್ನು ಇರಿಸಿ' : 'Keep 15-30cm distance from leaf'}</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span>✅</span>
+                      <span>{language === 'kn' ? 'ಸ್ಥಿರವಾದ ಕೈಯನ್ನು ಇರಿಸಿ ಮತ್ತು ಕ್ಯಾಮೆರಾವನ್ನು ಅಲುಗಾಡಿಸಬೇಡಿ' : 'Hold steady, avoid shaking camera'}</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span>✅</span>
+                      <span>{language === 'kn' ? 'ಸ್ವಚ್ಛ ಮತ್ತು ಒಣ ಎಲೆಗಳನ್ನು ಸ್ಕ್ಯಾನ್ ಮಾಡಿ' : 'Scan clean and dry leaves'}</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
             )}
           </Card>

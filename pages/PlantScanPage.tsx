@@ -11,7 +11,7 @@ import { MdMic, MdMicOff } from 'react-icons/md';
 import { PLANT_LIST } from '../constants';
 import { FaSearch } from 'react-icons/fa';
 import RelatedYouTubeVideo from '../components/RelatedYouTubeVideo';
-import { getCachedTranslation, isTextInExpectedScript } from '../utils/googleTranslate';
+import { getCachedTranslation } from '../utils/googleTranslate';
 
 // Add supported languages for translation - Only English and Kannada
 const TRANSLATE_LANGS = [
@@ -27,10 +27,7 @@ const PlantScanPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [customPrompt, setCustomPrompt] = useState<string>("");
   const { translate} = useLanguage();
-  const [detectedLang, setDetectedLang] = useState<string>('en');
   const [isRecording, setIsRecording] = useState(false);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
   const [rawSTTText, setRawSTTText] = useState<string>("");
   const [aiCorrectedText, setAICorrectedText] = useState<string>("");
   const [sttLangDisplay, setSTTLangDisplay] = useState<string>("");
@@ -46,6 +43,7 @@ const PlantScanPage: React.FC = () => {
   const recognitionRef = useRef<any>(null);
 
   // TTS controls
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [ttsUtterance, setTtsUtterance] = useState<SpeechSynthesisUtterance | null>(null);
   const [ttsPaused, setTtsPaused] = useState(false);
   const [ttsSpeaking, setTtsSpeaking] = useState(false);
@@ -182,8 +180,6 @@ const PlantScanPage: React.FC = () => {
     }
     setIsLoading(false);
   };
-  
-  const defaultPromptTextForPlaceholder = `You are a plant health expert... Respond ONLY in JSON format with keys: "condition", "statusTag", "diseaseName", "careSuggestions" (array of strings), "confidenceLevel".`;
 
   let diagnosisTextForTTS = "";
   if (diagnosis) {
@@ -384,6 +380,7 @@ const PlantScanPage: React.FC = () => {
   };
 
   // Improved TTS for translated answers
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const speakTranslated = (text: string, langCode: string) => {
     if (!('speechSynthesis' in window)) {
       setError('Text-to-speech is not supported in this browser.');
