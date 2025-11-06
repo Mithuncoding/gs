@@ -27,6 +27,7 @@ const ARPlantScanPage: React.FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState<string>('');
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
 
   // Monitor online/offline status
   useEffect(() => {
@@ -76,92 +77,86 @@ const ARPlantScanPage: React.FC = () => {
     }
   }, []);
 
-  // Simulate disease detection using color analysis and pattern recognition
+  // Improved detection: 1 box per leaf with better algorithm
   const detectDiseases = useCallback((imageData: ImageData) => {
-    const detections: DetectionBox[] = [];
     const width = imageData.width;
     const height = imageData.height;
     const data = imageData.data;
 
-    // Simple color-based detection algorithm
-    // This simulates ML model detection for demo purposes
-    const gridSize = 80; // Analyze in 80x80 pixel blocks
+    let redSum = 0, greenSum = 0, blueSum = 0;
+    let pixelCount = 0;
+    let yellowishPixels = 0;
+    let brownishPixels = 0;
+    let greenPixels = 0;
     
-    for (let y = 0; y < height - gridSize; y += gridSize) {
-      for (let x = 0; x < width - gridSize; x += gridSize) {
-        let redSum = 0, greenSum = 0, blueSum = 0;
-        let pixelCount = 0;
-        let yellowishPixels = 0;
-        let brownishPixels = 0;
+    // Find bounding box of green regions (leaf area)
+    let minX = width, maxX = 0, minY = height, maxY = 0;
+    
+    // Analyze entire image
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const i = (y * width + x) * 4;
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
         
-        // Analyze color distribution in block
-        for (let dy = 0; dy < gridSize; dy++) {
-          for (let dx = 0; dx < gridSize; dx++) {
-            const i = ((y + dy) * width + (x + dx)) * 4;
-            const r = data[i];
-            const g = data[i + 1];
-            const b = data[i + 2];
-            
-            redSum += r;
-            greenSum += g;
-            blueSum += b;
-            pixelCount++;
-            
-            // Detect disease indicators by color
-            // Yellow/brown spots indicate disease
-            if (r > 150 && g > 120 && b < 100) yellowishPixels++;
-            if (r > 100 && r < 150 && g > 80 && g < 130 && b < 80) brownishPixels++;
-          }
-        }
-        
-        const avgR = redSum / pixelCount;
-        const avgG = greenSum / pixelCount;
-        const avgB = blueSum / pixelCount;
-        
-        // Only process green-ish areas (likely plant material)
-        if (avgG > avgR && avgG > avgB && avgG > 50) {
-          const diseaseRatio = (yellowishPixels + brownishPixels) / pixelCount;
+        // Detect green-ish areas (likely plant material)
+        if (g > r && g > b && g > 50) {
+          greenPixels++;
+          if (x < minX) minX = x;
+          if (x > maxX) maxX = x;
+          if (y < minY) minY = y;
+          if (y > maxY) maxY = y;
           
-          // Determine severity based on color abnormalities
-          if (diseaseRatio > 0.15) {
-            // High disease
-            detections.push({
-              x: x,
-              y: y,
-              width: gridSize,
-              height: gridSize,
-              confidence: Math.min(diseaseRatio * 5, 0.95),
-              severity: 'diseased',
-              label: language === 'kn' ? 'ರೋಗಗ್ರಸ್ತ' : 'Diseased'
-            });
-          } else if (diseaseRatio > 0.05) {
-            // Moderate disease
-            detections.push({
-              x: x,
-              y: y,
-              width: gridSize,
-              height: gridSize,
-              confidence: diseaseRatio * 3,
-              severity: 'moderate',
-              label: language === 'kn' ? 'ಮಧ್ಯಮ' : 'Moderate'
-            });
-          } else if (Math.random() > 0.7) {
-            // Show occasional healthy regions
-            detections.push({
-              x: x,
-              y: y,
-              width: gridSize,
-              height: gridSize,
-              confidence: 0.9,
-              severity: 'healthy',
-              label: language === 'kn' ? 'ಆರೋಗ್ಯಕರ' : 'Healthy'
-            });
-          }
+          redSum += r;
+          greenSum += g;
+          blueSum += b;
+          pixelCount++;
+          
+          // Detect disease indicators by color
+          if (r > 150 && g > 120 && b < 100) yellowishPixels++;
+          if (r > 100 && r < 150 && g > 80 && g < 130 && b < 80) brownishPixels++;
         }
       }
     }
     
-    return detections;
+    // Only create one box if leaf detected
+    if (greenPixels > 1000) { // Minimum pixels for a leaf
+      const diseaseRatio = (yellowishPixels + brownishPixels) / pixelCount;
+      
+      // Add padding to bounding box
+      const padding = 20;
+      const boxX = Math.max(0, minX - padding);
+      const boxY = Math.max(0, minY - padding);
+      const boxWidth = Math.min(width - boxX, maxX - minX + padding * 2);
+      const boxHeight = Math.min(height - boxY, maxY - minY + padding * 2);
+      
+      let severity: 'healthy' | 'moderate' | 'diseased';
+      let label: string;
+      
+      if (diseaseRatio > 0.15) {
+        severity = 'diseased';
+        label = language === 'kn' ? 'ರೋಗಗ್ರಸ್ತ' : 'Diseased';
+      } else if (diseaseRatio > 0.05) {
+        severity = 'moderate';
+        label = language === 'kn' ? 'ಮಧ್ಯಮ' : 'Moderate';
+      } else {
+        severity = 'healthy';
+        label = language === 'kn' ? 'ಆರೋಗ್ಯಕರ' : 'Healthy';
+      }
+      
+      return [{
+        x: boxX,
+        y: boxY,
+        width: boxWidth,
+        height: boxHeight,
+        confidence: Math.min(diseaseRatio > 0.05 ? diseaseRatio * 5 : 0.9, 0.95),
+        severity: severity,
+        label: label
+      }];
+    }
+    
+    return [];
   }, [language]);
 
   // Draw AR overlays on canvas
@@ -265,6 +260,42 @@ const ARPlantScanPage: React.FC = () => {
     }
   }, [isScanning, scanFrame]);
 
+  // Capture photo with detection box
+  const capturePhoto = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    
+    if (!video || !canvas) return;
+    
+    // Create a new canvas to combine video + overlay
+    const captureCanvas = document.createElement('canvas');
+    captureCanvas.width = video.videoWidth;
+    captureCanvas.height = video.videoHeight;
+    const ctx = captureCanvas.getContext('2d');
+    
+    if (!ctx) return;
+    
+    // Draw video frame
+    ctx.drawImage(video, 0, 0);
+    
+    // Draw detection overlays on top
+    if (detections.length > 0) {
+      drawOverlays(detections);
+      // Copy canvas overlay to capture
+      ctx.drawImage(canvas, 0, 0);
+    }
+    
+    // Convert to base64
+    const photoData = captureCanvas.toDataURL('image/jpeg', 0.9);
+    setCapturedPhoto(photoData);
+    
+    // Auto-download
+    const link = document.createElement('a');
+    link.href = photoData;
+    link.download = `plant-detection-${Date.now()}.jpg`;
+    link.click();
+  };
+
   // Capture and analyze with Gemini AI
   const captureAndAnalyze = async () => {
     if (!videoRef.current || !canvasRef.current) return;
@@ -330,47 +361,47 @@ Provide clear, actionable advice for farmers.`;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 pb-8">
-      {/* Hero Section - Matching PlantScan Theme */}
-      <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white py-12 px-4 shadow-2xl">
+      {/* Hero Section - Mobile Responsive */}
+      <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white py-6 md:py-12 px-4 shadow-2xl">
         <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-5xl md:text-6xl font-bold mb-4 flex items-center justify-center gap-3 drop-shadow-lg">
-            <span className="text-6xl">📱</span>
-            {language === 'kn' ? 'AR ಸಸ್ಯ ರೋಗ ಪತ್ತೆ' : 'AR Plant Disease Detection'}
-            <span className="text-6xl">🔍</span>
+          <h1 className="text-2xl md:text-5xl lg:text-6xl font-bold mb-3 md:mb-4 flex flex-col md:flex-row items-center justify-center gap-2 md:gap-3 drop-shadow-lg">
+            <span className="text-4xl md:text-6xl">📱</span>
+            <span>{language === 'kn' ? 'AR ಸಸ್ಯ ರೋಗ ಪತ್ತೆ' : 'AR Plant Disease Detection'}</span>
+            <span className="text-4xl md:text-6xl">🔍</span>
           </h1>
-          <p className="text-xl md:text-2xl opacity-95 max-w-3xl mx-auto mb-6 font-medium">
+          <p className="text-sm md:text-xl lg:text-2xl opacity-95 max-w-3xl mx-auto mb-4 md:mb-6 font-medium">
             {language === 'kn' 
-              ? 'ನೈಜ-ಸಮಯದ ಆಗ್ಮೆಂಟೆಡ್ ರಿಯಾಲಿಟಿ ರೋಗ ಪತ್ತೆ - ತ್ವರಿತ ರೋಗನಿರ್ಣಯಕ್ಕಾಗಿ ನಿಮ್ಮ ಕ್ಯಾಮೆರಾವನ್ನು ಬೆಳೆಗಳ ಮೇಲೆ ತೋರಿಸಿ'
-              : 'Real-Time Augmented Reality Disease Detection - Point your camera at crops for instant diagnosis'
+              ? 'ನೈಜ-ಸಮಯದ ರೋಗ ಪತ್ತೆ - ಎಲೆಯತ್ತ ಕ್ಯಾಮೆರಾ ತೋರಿಸಿ'
+              : 'Real-Time Detection - Point camera at leaf'
             }
           </p>
           
-          {/* Detection Legend */}
-          <div className="mt-6 flex flex-wrap justify-center gap-4 text-base">
-            <div className="bg-white/20 backdrop-blur-md px-5 py-3 rounded-full flex items-center gap-3 border-2 border-red-300">
-              <div className="w-4 h-4 bg-red-500 rounded-full animate-pulse"></div>
-              <span className="font-bold">{language === 'kn' ? 'ರೋಗಗ್ರಸ್ತ' : 'Severely Diseased'}</span>
+          {/* Detection Legend - Mobile Responsive */}
+          <div className="mt-4 md:mt-6 flex flex-wrap justify-center gap-2 md:gap-4 text-xs md:text-base">
+            <div className="bg-white/20 backdrop-blur-md px-3 md:px-5 py-2 md:py-3 rounded-full flex items-center gap-2 border-2 border-red-300">
+              <div className="w-3 h-3 md:w-4 md:h-4 bg-red-500 rounded-full animate-pulse"></div>
+              <span className="font-bold">{language === 'kn' ? 'ರೋಗಗ್ರಸ್ತ' : 'Diseased'}</span>
             </div>
-            <div className="bg-white/20 backdrop-blur-md px-5 py-3 rounded-full flex items-center gap-3 border-2 border-yellow-300">
-              <div className="w-4 h-4 bg-yellow-500 rounded-full animate-pulse"></div>
-              <span className="font-bold">{language === 'kn' ? 'ಮಧ್ಯಮ' : 'Moderate Concern'}</span>
+            <div className="bg-white/20 backdrop-blur-md px-3 md:px-5 py-2 md:py-3 rounded-full flex items-center gap-2 border-2 border-yellow-300">
+              <div className="w-3 h-3 md:w-4 md:h-4 bg-yellow-500 rounded-full animate-pulse"></div>
+              <span className="font-bold">{language === 'kn' ? 'ಮಧ್ಯಮ' : 'Moderate'}</span>
             </div>
-            <div className="bg-white/20 backdrop-blur-md px-5 py-3 rounded-full flex items-center gap-3 border-2 border-green-300">
-              <div className="w-4 h-4 bg-green-500 rounded-full animate-pulse"></div>
+            <div className="bg-white/20 backdrop-blur-md px-3 md:px-5 py-2 md:py-3 rounded-full flex items-center gap-2 border-2 border-green-300">
+              <div className="w-3 h-3 md:w-4 md:h-4 bg-green-500 rounded-full animate-pulse"></div>
               <span className="font-bold">{language === 'kn' ? 'ಆರೋಗ್ಯಕರ' : 'Healthy'}</span>
             </div>
             {isOffline && (
-              <div className="bg-amber-500/90 px-5 py-3 rounded-full flex items-center gap-2 border-2 border-amber-600 animate-bounce">
-                <span className="text-xl">📴</span>
-                <span className="font-bold">{language === 'kn' ? 'ಆಫ್‌ಲೈನ್ ಮೋಡ್' : 'Offline Mode'}</span>
+              <div className="bg-amber-500/90 px-3 md:px-5 py-2 md:py-3 rounded-full flex items-center gap-1 md:gap-2 border-2 border-amber-600">
+                <span className="text-base md:text-xl">📴</span>
+                <span className="font-bold">{language === 'kn' ? 'ಆಫ್‌ಲೈನ್' : 'Offline'}</span>
               </div>
             )}
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 mt-8">
-        <div className="grid lg:grid-cols-2 gap-6">
+      <div className="max-w-7xl mx-auto px-4 mt-6 md:mt-8">
+        <div className="grid lg:grid-cols-2 gap-4 md:gap-6">
           {/* Camera Section */}
           <Card className="bg-white/95 backdrop-blur-sm shadow-2xl border-2 border-green-200">
             <div className="flex items-center justify-between mb-6">
@@ -471,68 +502,76 @@ Provide clear, actionable advice for farmers.`;
             </div>
             
             {/* Enhanced Camera Controls */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               {!isCameraActive ? (
                 <button
                   onClick={startCamera}
-                  className="w-full bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 hover:from-green-700 hover:via-emerald-700 hover:to-teal-700 text-white px-8 py-5 rounded-2xl font-bold text-xl hover:scale-105 transition-all shadow-2xl flex items-center justify-center gap-4 border-4 border-green-300"
+                  className="w-full bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 hover:from-green-700 hover:via-emerald-700 hover:to-teal-700 text-white px-6 py-4 rounded-xl font-bold text-lg hover:scale-105 transition-all shadow-lg flex items-center justify-center gap-3"
                 >
-                  <span className="text-4xl animate-bounce">📷</span>
+                  <span className="text-3xl">📷</span>
                   <span>{language === 'kn' ? 'ಕ್ಯಾಮೆರಾ ಪ್ರಾರಂಭಿಸಿ' : 'START CAMERA'}</span>
-                  <span className="text-4xl animate-bounce">▶️</span>
                 </button>
               ) : (
-                <div className="grid grid-cols-2 gap-4">
-                  <button
-                    onClick={() => setIsScanning(!isScanning)}
-                    className={`${
-                      isScanning 
-                        ? 'bg-gradient-to-r from-orange-500 via-red-500 to-red-600 hover:from-orange-600 hover:via-red-600 hover:to-red-700' 
-                        : 'bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 hover:from-green-700 hover:via-emerald-700 hover:to-teal-700'
-                    } text-white px-6 py-4 rounded-2xl font-bold text-lg hover:scale-105 transition-all shadow-2xl flex items-center justify-center gap-3 border-4 ${
-                      isScanning ? 'border-orange-300' : 'border-green-300'
-                    }`}
-                  >
-                    <span className="text-3xl">{isScanning ? '⏸️' : '▶️'}</span>
-                    <span>
-                      {isScanning 
-                        ? (language === 'kn' ? 'ವಿರಾಮ' : 'PAUSE')
-                        : (language === 'kn' ? 'ಸ್ಕ್ಯಾನ್' : 'SCAN')
-                      }
-                    </span>
-                  </button>
+                <>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      onClick={() => setIsScanning(!isScanning)}
+                      className={`${
+                        isScanning 
+                          ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600' 
+                          : 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700'
+                      } text-white px-4 py-3 rounded-xl font-bold text-base hover:scale-105 transition-all shadow-lg flex items-center justify-center gap-2`}
+                    >
+                      <span className="text-2xl">{isScanning ? '⏸️' : '▶️'}</span>
+                      <span className="hidden sm:inline">
+                        {isScanning 
+                          ? (language === 'kn' ? 'ವಿರಾಮ' : 'PAUSE')
+                          : (language === 'kn' ? 'ಸ್ಕ್ಯಾನ್' : 'SCAN')
+                        }
+                      </span>
+                    </button>
+                    
+                    <button
+                      onClick={stopCamera}
+                      className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-4 py-3 rounded-xl font-bold text-base hover:scale-105 transition-all shadow-lg flex items-center justify-center gap-2"
+                    >
+                      <span className="text-2xl">⏹️</span>
+                      <span className="hidden sm:inline">{language === 'kn' ? 'ನಿಲ್ಲಿಸಿ' : 'STOP'}</span>
+                    </button>
+                  </div>
                   
-                  <button
-                    onClick={stopCamera}
-                    className="bg-gradient-to-r from-gray-600 via-gray-700 to-gray-800 hover:from-gray-700 hover:via-gray-800 hover:to-gray-900 text-white px-6 py-4 rounded-2xl font-bold text-lg hover:scale-105 transition-all shadow-2xl flex items-center justify-center gap-3 border-4 border-gray-400"
-                  >
-                    <span className="text-3xl">⏹️</span>
-                    <span>{language === 'kn' ? 'ನಿಲ್ಲಿಸಿ' : 'STOP'}</span>
-                  </button>
-                </div>
+                  {/* Capture Photo Button */}
+                  {detections.length > 0 && (
+                    <button
+                      onClick={capturePhoto}
+                      className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-bold text-base hover:scale-105 transition-all shadow-lg flex items-center justify-center gap-3"
+                    >
+                      <span className="text-2xl">📸</span>
+                      <span>{language === 'kn' ? 'ಫೋಟೋ ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿ' : 'CAPTURE PHOTO'}</span>
+                      <span className="text-2xl">💾</span>
+                    </button>
+                  )}
+                </>
               )}
               
-              {/* AI Analysis Button - Enhanced */}
-              {isCameraActive && (
+              {/* AI Analysis Button */}
+              {isCameraActive && detections.length > 0 && (
                 <button
                   onClick={captureAndAnalyze}
                   disabled={isAnalyzing || isOffline}
                   className={`w-full ${
                     isOffline 
                       ? 'bg-gray-400 cursor-not-allowed' 
-                      : 'bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700'
-                  } text-white px-8 py-5 rounded-2xl font-bold text-xl hover:scale-105 transition-all shadow-2xl flex items-center justify-center gap-4 disabled:opacity-50 disabled:hover:scale-100 border-4 ${
-                    isOffline ? 'border-gray-500' : 'border-purple-300'
-                  }`}
+                      : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700'
+                  } text-white px-6 py-3 rounded-xl font-bold text-base hover:scale-105 transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:hover:scale-100`}
                 >
-                  <span className="text-4xl">{isAnalyzing ? '⚙️' : '🤖'}</span>
+                  <span className="text-2xl">{isAnalyzing ? '⚙️' : '🤖'}</span>
                   <span>
                     {isAnalyzing 
-                      ? (language === 'kn' ? 'AI ವಿಶ್ಲೇಷಿಸುತ್ತಿದೆ...' : 'AI ANALYZING...')
-                      : (language === 'kn' ? 'AI ವಿವರವಾದ ವಿಶ್ಲೇಷಣೆ' : 'GET AI DETAILED ANALYSIS')
+                      ? (language === 'kn' ? 'ವಿಶ್ಲೇಷಣೆ...' : 'ANALYZING...')
+                      : (language === 'kn' ? 'AI ವಿಶ್ಲೇಷಣೆ' : 'AI ANALYSIS')
                     }
                   </span>
-                  <span className="text-4xl">{isAnalyzing ? '⚙️' : '🧠'}</span>
                 </button>
               )}
               
@@ -568,66 +607,72 @@ Provide clear, actionable advice for farmers.`;
             </div>
           </Card>
 
-          {/* Results Section - Enhanced */}
-          <Card className="bg-white/95 backdrop-blur-sm shadow-2xl border-2 border-blue-200">
-            <h2 className="text-3xl font-bold text-blue-700 mb-6 flex items-center gap-3">
-              <span className="text-4xl">📊</span>
-              {language === 'kn' ? 'ಪತ್ತೆ ಫಲಿತಾಂಶಗಳು' : 'Detection Results'}
+          {/* Results Section - Simplified for single detection */}
+          <Card className="bg-white/95 backdrop-blur-sm shadow-xl border-2 border-blue-200">
+            <h2 className="text-2xl md:text-3xl font-bold text-blue-700 mb-4 flex items-center gap-2">
+              <span className="text-3xl">📊</span>
+              {language === 'kn' ? 'ಪತ್ತೆ ಫಲಿತಾಂಶ' : 'Detection Result'}
             </h2>
             
-            {/* Real-time Stats - Enhanced Grid */}
-            <div className="grid grid-cols-3 gap-4 mb-6">
-              <div className="bg-gradient-to-br from-red-50 to-red-100 border-3 border-red-400 rounded-2xl p-5 text-center transform hover:scale-105 transition-all shadow-lg">
-                <div className="text-5xl font-bold text-red-600 mb-2">
-                  {detections.filter(d => d.severity === 'diseased').length}
-                </div>
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                  <div className="text-sm font-bold text-red-700">
-                    {language === 'kn' ? 'ರೋಗಗ್ರಸ್ತ' : 'Diseased'}
+            {/* Single Leaf Detection Status */}
+            {detections.length > 0 ? (
+              <div className="mb-6">
+                <div className={`p-6 rounded-xl text-center shadow-lg border-3 ${
+                  detections[0].severity === 'diseased' 
+                    ? 'bg-gradient-to-br from-red-50 to-red-100 border-red-400'
+                    : detections[0].severity === 'moderate'
+                    ? 'bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-400'
+                    : 'bg-gradient-to-br from-green-50 to-green-100 border-green-400'
+                }`}>
+                  <div className={`text-6xl font-bold mb-2 ${
+                    detections[0].severity === 'diseased' ? 'text-red-600'
+                    : detections[0].severity === 'moderate' ? 'text-yellow-600'
+                    : 'text-green-600'
+                  }`}>
+                    {detections[0].severity === 'diseased' ? '🔴' : detections[0].severity === 'moderate' ? '🟡' : '🟢'}
                   </div>
-                </div>
-                {detections.filter(d => d.severity === 'diseased').length > 0 && (
-                  <div className="mt-2 text-xs text-red-600 font-semibold">
-                    ⚠️ {language === 'kn' ? 'ಗಮನ ಬೇಕು' : 'Needs Attention'}
+                  <div className={`text-2xl font-bold mb-2 ${
+                    detections[0].severity === 'diseased' ? 'text-red-700'
+                    : detections[0].severity === 'moderate' ? 'text-yellow-700'
+                    : 'text-green-700'
+                  }`}>
+                    {detections[0].label}
                   </div>
-                )}
+                  <div className={`text-sm font-semibold ${
+                    detections[0].severity === 'diseased' ? 'text-red-600'
+                    : detections[0].severity === 'moderate' ? 'text-yellow-600'
+                    : 'text-green-600'
+                  }`}>
+                    {language === 'kn' ? 'ವಿಶ್ವಾಸ' : 'Confidence'}: {Math.round(detections[0].confidence * 100)}%
+                  </div>
+                  {detections[0].severity === 'diseased' && (
+                    <div className="mt-3 text-sm text-red-700 font-semibold">
+                      ⚠️ {language === 'kn' ? 'ತಕ್ಷಣ ಗಮನ ಬೇಕು!' : 'Immediate attention needed!'}
+                    </div>
+                  )}
+                  {detections[0].severity === 'moderate' && (
+                    <div className="mt-3 text-sm text-yellow-700 font-semibold">
+                      👁️ {language === 'kn' ? 'ನಿಯಮಿತವಾಗಿ ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಿ' : 'Monitor regularly'}
+                    </div>
+                  )}
+                  {detections[0].severity === 'healthy' && (
+                    <div className="mt-3 text-sm text-green-700 font-semibold">
+                      ✅ {language === 'kn' ? 'ಉತ್ತಮ ಆರೋಗ್ಯ!' : 'Good health!'}
+                    </div>
+                  )}
+                </div>
               </div>
-              
-              <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-3 border-yellow-400 rounded-2xl p-5 text-center transform hover:scale-105 transition-all shadow-lg">
-                <div className="text-5xl font-bold text-yellow-600 mb-2">
-                  {detections.filter(d => d.severity === 'moderate').length}
-                </div>
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                  <div className="text-sm font-bold text-yellow-700">
-                    {language === 'kn' ? 'ಮಧ್ಯಮ' : 'Moderate'}
-                  </div>
-                </div>
-                {detections.filter(d => d.severity === 'moderate').length > 0 && (
-                  <div className="mt-2 text-xs text-yellow-600 font-semibold">
-                    👁️ {language === 'kn' ? 'ಮೇಲ್ವಿಚಾರಣೆ' : 'Monitor'}
-                  </div>
-                )}
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <div className="text-6xl mb-3">🔍</div>
+                <p className="text-lg">
+                  {language === 'kn' 
+                    ? 'ಎಲೆಯನ್ನು ಪತ್ತೆ ಮಾಡಲಾಗಿಲ್ಲ. ದಯವಿಟ್ಟು ಸಸ್ಯದ ಎಲೆಯತ್ತ ಕ್ಯಾಮೆರಾವನ್ನು ತೋರಿಸಿ.'
+                    : 'No leaf detected. Please point camera at a plant leaf.'
+                  }
+                </p>
               </div>
-              
-              <div className="bg-gradient-to-br from-green-50 to-green-100 border-3 border-green-400 rounded-2xl p-5 text-center transform hover:scale-105 transition-all shadow-lg">
-                <div className="text-5xl font-bold text-green-600 mb-2">
-                  {detections.filter(d => d.severity === 'healthy').length}
-                </div>
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                  <div className="text-sm font-bold text-green-700">
-                    {language === 'kn' ? 'ಆರೋಗ್ಯಕರ' : 'Healthy'}
-                  </div>
-                </div>
-                {detections.filter(d => d.severity === 'healthy').length > 0 && (
-                  <div className="mt-2 text-xs text-green-600 font-semibold">
-                    ✅ {language === 'kn' ? 'ಉತ್ತಮ' : 'Good'}
-                  </div>
-                )}
-              </div>
-            </div>
+            )}
             
             {/* AI Diagnosis - Enhanced */}
             {diagnosis && (

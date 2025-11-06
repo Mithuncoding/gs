@@ -430,18 +430,6 @@ const PlantScanPage: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* AR Camera Button - Prominent at the top */}
-      <div className="mb-6 flex justify-center">
-        <button
-          onClick={() => navigate('/ar-scan')}
-          className="bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 hover:from-purple-700 hover:via-pink-700 hover:to-red-700 text-white px-8 py-4 rounded-2xl font-bold text-xl shadow-2xl hover:scale-105 transition-all flex items-center gap-4 border-4 border-purple-300 animate-pulse"
-        >
-          <span className="text-4xl">📱</span>
-          <span>{translate('arCameraDetection') || '🔴 AR LIVE CAMERA DETECTION'}</span>
-          <span className="text-4xl">🎯</span>
-        </button>
-      </div>
-      
       <h2 className="text-3xl font-bold text-green-700 mb-6 text-center capitalize">Plant Identifier</h2>
       <p className="text-gray-600 mb-8 text-center max-w-2xl mx-auto">
         {activeCategory === 'Unknown Plant' 
@@ -496,99 +484,21 @@ const PlantScanPage: React.FC = () => {
                   AR Detection Settings
                 </h3>
                 
-                {/* Voice Input Section */}
-                <div className="mb-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border-2 border-blue-200">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-semibold text-blue-700 flex items-center gap-2">
-                      🎤 Voice Input
-                    </span>
-                    <select
-                      value={selectedLang}
-                      onChange={(e) => setSelectedLang(e.target.value)}
-                      className="px-3 py-1 text-sm border border-blue-300 rounded-lg bg-white"
-                    >
-                      <option value="en-US">🇺🇸 English</option>
-                      <option value="kn-IN">🇮🇳 ಕನ್ನಡ (Kannada)</option>
-                    </select>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 mb-2">
-                    <textarea
-                      value={customPrompt || (selectedPlant && selectedPlant !== 'Unknown Plant' ? selectedPlant : '')}
-                      onChange={(e) => setCustomPrompt(e.target.value)}
-                      placeholder={selectedLang === 'kn-IN' 
-                        ? "ಸಸ್ಯದ ಬಗ್ಗೆ ನಿಮ್ಮ ಪ್ರಶ್ನೆ ಅಥವಾ ಚಿಂತೆಯನ್ನು ಟೈಪ್ ಮಾಡಿ ಅಥವಾ ಮಾತನಾಡಿ..." 
-                        : "Type or speak your question about the plant..."}
-                      rows={3}
-                      className="w-full p-3 border-2 border-blue-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white"
-                      aria-label="Custom prompt"
-                    />
-                    <button
-                      onClick={handleToggleRecording}
-                      className={`p-4 rounded-full shadow-xl border-3 transition-all ${
-                        isRecording 
-                          ? 'bg-red-500 border-red-700 animate-pulse scale-110' 
-                          : 'bg-gradient-to-r from-blue-500 to-purple-500 border-blue-700 hover:scale-105'
-                      }`}
-                      title={isRecording ? 'Stop Recording' : 'Start Voice Input'}
-                      aria-label={isRecording ? 'Stop Recording' : 'Start Voice Input'}
-                    >
-                      {isRecording ? (
-                        <MdMicOff className="w-7 h-7 text-white" />
-                      ) : (
-                        <MdMic className="w-7 h-7 text-white" />
-                      )}
-                    </button>
-                  </div>
-                  
-                  {rawSTTText && (
-                    <div className="mt-2 p-2 bg-white rounded-lg border border-blue-200">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs font-semibold text-blue-600">
-                          📝 Detected: {sttLangDisplay === 'kn-IN' ? 'ಕನ್ನಡ' : 'English'}
-                        </span>
-                        <button
-                          onClick={handleAICorrectPrompt}
-                          className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
-                            aiPromptActive 
-                              ? 'bg-yellow-400 text-white animate-pulse' 
-                              : 'bg-purple-500 text-white hover:bg-purple-600'
-                          }`}
-                          title="AI: Improve sentence"
-                        >
-                          ✨ AI Enhance
-                        </button>
-                      </div>
-                      {aiCorrectedText && (
-                        <div className="text-sm text-green-700 bg-green-50 p-2 rounded mt-1">
-                          ✓ Enhanced: {aiCorrectedText}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  
-                  {(customPrompt || (selectedPlant && selectedPlant !== 'Unknown Plant')) && (
-                    <button
-                      onClick={() => {
-                        const langObj = TRANSLATE_LANGS.find(l => l.tts === selectedLang);
-                        speakWithCloudTTS(
-                          customPrompt || selectedPlant || '', 
-                          selectedLang, 
-                          'question',
-                          langObj?.voiceName
-                        );
-                      }}
-                      className={`mt-2 px-4 py-2 rounded-full font-semibold transition-all ${
-                        speakActive === 'question' 
-                          ? 'bg-yellow-400 text-white animate-pulse' 
-                          : 'bg-gradient-to-r from-green-500 to-blue-500 text-white hover:scale-105'
-                      }`}
-                      title="Speak question"
-                      aria-label="Speak question"
-                    >
-                      🔊 {selectedLang === 'kn-IN' ? 'ಪ್ರಶ್ನೆಯನ್ನು ಮಾತನಾಡಿಸಿ' : 'Speak Question'}
-                    </button>
-                  )}
+                {/* AR Live Camera Button */}
+                <div className="mb-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border-2 border-purple-200">
+                  <button
+                    onClick={() => navigate('/ar-scan')}
+                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
+                  >
+                    <span className="text-2xl">�</span>
+                    <span>{translate('arCameraDetection') || '🔴 AR LIVE CAMERA DETECTION'}</span>
+                  </button>
+                  <p className="text-xs text-purple-600 mt-2 text-center">
+                    {selectedLang === 'kn-IN' 
+                      ? 'ನೈಜ-ಸಮಯದ ರೋಗ ಪತ್ತೆಗಾಗಿ ಲೈವ್ ಕ್ಯಾಮೆರಾವನ್ನು ತೆರೆಯಿರಿ'
+                      : 'Open live camera for real-time disease detection'
+                    }
+                  </p>
                 </div>
 
                 {/* AR Detection Settings */}
@@ -665,10 +575,13 @@ const PlantScanPage: React.FC = () => {
                     
                     {/* Detection Sensitivity */}
                     <div className="pt-2 border-t border-green-200">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="detectionSensitivity" className="block text-sm font-medium text-gray-700 mb-2">
                         🎚️ Detection Sensitivity
                       </label>
                       <select
+                        id="detectionSensitivity"
+                        title="Detection Sensitivity"
+                        aria-label="Detection Sensitivity"
                         value={arSettings.detectionSensitivity}
                         onChange={(e) => setArSettings({...arSettings, detectionSensitivity: e.target.value as 'low' | 'medium' | 'high'})}
                         className="w-full px-3 py-2 border-2 border-green-300 rounded-lg bg-white font-medium"
