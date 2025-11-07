@@ -3,7 +3,7 @@ import { GEMINI_TEXT_MODEL, GEMINI_VISION_MODEL } from '../constants';
 import { PlantDiagnosis, ImagePart, EncyclopediaEntry, CropInsight, FarmingAdvice, FertPestQuantitiesAIResponse, WeatherData } from '../types';
 
 // Hardcoded Gemini API Key for school project
-const API_KEY = 'AIzaSyBaPW9f5Xpy3fh8YODCMQKQbNW99jKNjFQ';
+const API_KEY = 'AIzaSyBnA9xLZ3K7hotg4T7sHKos4mFO5qRht_A';
 
 if (!API_KEY) {
   console.error("Gemini API Key is not set. AI features will not work.");
