@@ -28,7 +28,7 @@ const PlantScanPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [customPrompt, setCustomPrompt] = useState<string>("");
-  const { translate} = useLanguage();
+  const { translate, language } = useLanguage();
   const [isRecording, setIsRecording] = useState(false);
   const [rawSTTText, setRawSTTText] = useState<string>("");
   const [aiCorrectedText, setAICorrectedText] = useState<string>("");
@@ -71,17 +71,17 @@ const PlantScanPage: React.FC = () => {
 
   // --- Plant Picker Logic ---
   const mainCategories = [
-    { name: 'All Plants', emoji: '🪴' },
-    { name: 'Cereals & Millets', emoji: '🌾' },
-    { name: 'Pulses', emoji: '🫘' },
-    { name: 'Vegetables', emoji: '🥦' },
-    { name: 'Fruits', emoji: '🍎' },
-    { name: 'Spices', emoji: '🌶️' },
-    { name: 'Commercial Crops', emoji: '🏭' },
-    { name: 'Ornamental Plants', emoji: '🌸' },
-    { name: 'Medicinal Plants', emoji: '🌿' },
-    { name: 'Trees', emoji: '🌳' },
-    { name: 'Unknown Plant', emoji: '🔍' },
+    { name: translate('categoryAllPlants'), emoji: '🪴', key: 'All Plants' },
+    { name: translate('categoryCerealsMillets'), emoji: '🌾', key: 'Cereals & Millets' },
+    { name: translate('categoryPulses'), emoji: '🫘', key: 'Pulses' },
+    { name: translate('categoryVegetablesPlural'), emoji: '🥦', key: 'Vegetables' },
+    { name: translate('categoryFruitsPlural'), emoji: '🍎', key: 'Fruits' },
+    { name: translate('categorySpices'), emoji: '🌶️', key: 'Spices' },
+    { name: translate('categoryCommercialCrops'), emoji: '🏭', key: 'Commercial Crops' },
+    { name: translate('categoryOrnamentalPlants'), emoji: '🌸', key: 'Ornamental Plants' },
+    { name: translate('categoryMedicinalPlants'), emoji: '🌿', key: 'Medicinal Plants' },
+    { name: translate('categoryTreesPlural'), emoji: '🌳', key: 'Trees' },
+    { name: translate('categoryUnknownPlant'), emoji: '🔍', key: 'Unknown Plant' },
   ];
 
   // Auto-speak diagnosis when ready and voice guidance is enabled
@@ -157,7 +157,7 @@ const PlantScanPage: React.FC = () => {
       `;
     }
 
-    const result = await diagnosePlant(imageBase64, imageFile.type, promptToSend);
+    const result = await diagnosePlant(imageBase64, imageFile.type, promptToSend, language);
     
     if (result.error && !result.condition) { // Prioritize error if no condition is present
       setError(result.error);
@@ -440,14 +440,14 @@ const PlantScanPage: React.FC = () => {
       <div className="flex flex-wrap justify-center gap-2 mb-4">
         {mainCategories.map(cat => (
           <button
-            key={cat.name}
+            key={cat.key}
             onClick={() => { 
-              setActiveCategory(cat.name); 
+              setActiveCategory(cat.key); 
               // selectedPlant is now handled by useEffect above
             }}
             className={`flex items-center gap-2 px-5 py-2 rounded-2xl text-base font-medium shadow-sm border border-green-200 transition-colors
-              ${activeCategory === cat.name
-                ? (cat.name === 'Unknown Plant'
+              ${activeCategory === cat.key
+                ? (cat.key === 'Unknown Plant'
                     ? 'bg-indigo-600 text-white'
                     : 'bg-green-600 text-white')
                 : 'bg-white text-green-800 hover:bg-green-50'}
@@ -594,17 +594,20 @@ const PlantScanPage: React.FC = () => {
                     
                     {/* Overlay Opacity */}
                     <div className="pt-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        🎨 AR Overlay Opacity: {Math.round(arSettings.overlayOpacity * 100)}%
+                      <label htmlFor="overlayOpacity" className="block text-sm font-medium text-gray-700 mb-2">
+                      🎨 AR Overlay Opacity: {Math.round(arSettings.overlayOpacity * 100)}%
                       </label>
                       <input
-                        type="range"
-                        min="0"
-                        max="1"
-                        step="0.1"
-                        value={arSettings.overlayOpacity}
-                        onChange={(e) => setArSettings({...arSettings, overlayOpacity: parseFloat(e.target.value)})}
-                        className="w-full h-2 bg-green-200 rounded-lg appearance-none cursor-pointer"
+                      id="overlayOpacity"
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.1"
+                      value={arSettings.overlayOpacity}
+                      onChange={(e) => setArSettings({...arSettings, overlayOpacity: parseFloat(e.target.value)})}
+                      className="w-full h-2 bg-green-200 rounded-lg appearance-none cursor-pointer"
+                      title="AR Overlay Opacity"
+                      aria-label="AR Overlay Opacity Slider"
                       />
                     </div>
                     
@@ -685,7 +688,9 @@ const PlantScanPage: React.FC = () => {
                 style={{ minHeight: 60, transition: 'transform 0.15s, box-shadow 0.15s', boxShadow: selectedPlant === plant.name ? '0 8px 24px rgba(34,197,94,0.15)' : '0 2px 8px rgba(0,0,0,0.04)' }}
               >
                 <span className="text-2xl">{plant.emoji}</span>
-                <span className="truncate w-full font-medium text-base">{plant.name}</span>
+                <span className="truncate w-full font-medium text-base">
+                  {language === 'kn' && plant.nameKannada ? plant.nameKannada : plant.name}
+                </span>
               </button>
             ))}
             {filteredPlants.length === 0 && (

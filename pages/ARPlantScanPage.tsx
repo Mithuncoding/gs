@@ -87,6 +87,8 @@ const ARPlantScanPage: React.FC = () => {
     let pixelCount = 0;
     let yellowishPixels = 0;
     let brownishPixels = 0;
+    let darkSpots = 0;
+    let palePixels = 0;
     let greenPixels = 0;
     
     // Find bounding box of green regions (leaf area)
@@ -100,8 +102,8 @@ const ARPlantScanPage: React.FC = () => {
         const g = data[i + 1];
         const b = data[i + 2];
         
-        // Detect green-ish areas (likely plant material)
-        if (g > r && g > b && g > 50) {
+        // Detect green-ish areas (likely plant material) - BROADER detection
+        if (g > r * 0.8 && g > b * 0.8 && g > 40) {
           greenPixels++;
           if (x < minX) minX = x;
           if (x > maxX) maxX = x;
@@ -113,16 +115,25 @@ const ARPlantScanPage: React.FC = () => {
           blueSum += b;
           pixelCount++;
           
-          // Detect disease indicators by color
-          if (r > 150 && g > 120 && b < 100) yellowishPixels++;
-          if (r > 100 && r < 150 && g > 80 && g < 130 && b < 80) brownishPixels++;
+          // ENHANCED Disease indicators - BROADER ranges
+          // Yellowing (common in nutrient deficiency, viral infections)
+          if (r > 140 && g > 110 && b < 110) yellowishPixels++;
+          
+          // Brown spots (fungal diseases, bacterial blight)
+          if (r > 90 && r < 160 && g > 70 && g < 140 && b < 90) brownishPixels++;
+          
+          // Dark spots (black spot, early blight)
+          if (r < 60 && g < 60 && b < 60) darkSpots++;
+          
+          // Pale/whitish (powdery mildew, nutrient deficiency)
+          if (r > 180 && g > 180 && b > 160) palePixels++;
         }
       }
     }
     
-    // Only create one box if leaf detected
-    if (greenPixels > 1000) { // Minimum pixels for a leaf
-      const diseaseRatio = (yellowishPixels + brownishPixels) / pixelCount;
+    // Only create one box if leaf detected - LOWER threshold
+    if (greenPixels > 500) { // Reduced from 1000 to detect smaller leaves
+      const diseaseRatio = (yellowishPixels + brownishPixels + darkSpots + palePixels) / pixelCount;
       
       // Add padding to bounding box
       const padding = 20;
@@ -134,10 +145,11 @@ const ARPlantScanPage: React.FC = () => {
       let severity: 'healthy' | 'moderate' | 'diseased';
       let label: string;
       
-      if (diseaseRatio > 0.15) {
+      // IMPROVED thresholds - more sensitive detection
+      if (diseaseRatio > 0.08) { // Lowered from 0.15
         severity = 'diseased';
         label = language === 'kn' ? 'ರೋಗಗ್ರಸ್ತ' : 'Diseased';
-      } else if (diseaseRatio > 0.05) {
+      } else if (diseaseRatio > 0.03) { // Lowered from 0.05
         severity = 'moderate';
         label = language === 'kn' ? 'ಮಧ್ಯಮ' : 'Moderate';
       } else {
@@ -150,7 +162,7 @@ const ARPlantScanPage: React.FC = () => {
         y: boxY,
         width: boxWidth,
         height: boxHeight,
-        confidence: Math.min(diseaseRatio > 0.05 ? diseaseRatio * 5 : 0.9, 0.95),
+        confidence: Math.min(diseaseRatio > 0.03 ? diseaseRatio * 8 : 0.85, 0.95),
         severity: severity,
         label: label
       }];
@@ -159,7 +171,7 @@ const ARPlantScanPage: React.FC = () => {
     return [];
   }, [language]);
 
-  // Draw AR overlays on canvas
+  // Draw AR overlays on canvas with STUNNING effects
   const drawOverlays = useCallback((boxes: DetectionBox[]) => {
     const canvas = canvasRef.current;
     const video = videoRef.current;
@@ -176,35 +188,44 @@ const ARPlantScanPage: React.FC = () => {
     // Clear previous frame
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Draw each detection box
+    // Draw each detection box with ENHANCED styling
     boxes.forEach(box => {
-      // Set color based on severity
+      // Set color based on severity with GLOW effect
       let color: string;
       let bgColor: string;
+      let shadowColor: string;
       
       switch (box.severity) {
         case 'diseased':
           color = '#EF4444'; // Red
-          bgColor = 'rgba(239, 68, 68, 0.2)';
+          bgColor = 'rgba(239, 68, 68, 0.15)';
+          shadowColor = 'rgba(239, 68, 68, 0.8)';
           break;
         case 'moderate':
           color = '#F59E0B'; // Yellow/Orange
-          bgColor = 'rgba(245, 158, 11, 0.2)';
+          bgColor = 'rgba(245, 158, 11, 0.15)';
+          shadowColor = 'rgba(245, 158, 11, 0.8)';
           break;
         case 'healthy':
           color = '#10B981'; // Green
-          bgColor = 'rgba(16, 185, 129, 0.2)';
+          bgColor = 'rgba(16, 185, 129, 0.15)';
+          shadowColor = 'rgba(16, 185, 129, 0.8)';
           break;
       }
       
-      // Draw filled rectangle
+      // Draw GLOWING filled rectangle
       ctx.fillStyle = bgColor;
       ctx.fillRect(box.x, box.y, box.width, box.height);
       
-      // Draw border
+      // Draw ANIMATED border with shadow glow
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = shadowColor;
       ctx.strokeStyle = color;
-      ctx.lineWidth = 3;
+      ctx.lineWidth = 4;
       ctx.strokeRect(box.x, box.y, box.width, box.height);
+      
+      // Reset shadow
+      ctx.shadowBlur = 0;
       
       // Draw label background
       ctx.fillStyle = color;
@@ -342,7 +363,7 @@ const ARPlantScanPage: React.FC = () => {
 Provide clear, actionable advice for farmers.`;
       
       // Analyze with Gemini
-      const result = await analyzeImage(base64, prompt);
+      const result = await analyzeImage(base64, prompt, language);
       
       // Parse response
       const lines = result.split('\n').filter((line: string) => line.trim());
@@ -404,23 +425,23 @@ Provide clear, actionable advice for farmers.`;
         <div className="grid lg:grid-cols-2 gap-4 md:gap-6">
           {/* Camera Section */}
           <Card className="bg-white/95 backdrop-blur-sm shadow-2xl border-2 border-green-200">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-3xl font-bold text-green-700 flex items-center gap-3">
-                <span className="text-4xl">📹</span>
-                {language === 'kn' ? 'ಲೈವ್ ಕ್ಯಾಮೆರಾ ಸ್ಕ್ಯಾನ್' : 'Live Camera Scan'}
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl md:text-2xl font-bold text-green-700 flex items-center gap-2">
+                <span className="text-2xl">📹</span>
+                {language === 'kn' ? 'ಲೈವ್ ಕ್ಯಾಮೆರಾ' : 'Live Camera'}
               </h2>
               {isCameraActive && (
-                <div className="flex items-center gap-2 bg-green-100 px-4 py-2 rounded-full border-2 border-green-500">
-                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-green-700 font-bold text-sm">
+                <div className="flex items-center gap-2 bg-green-100 px-3 py-1 rounded-full border-2 border-green-500">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-green-700 font-bold text-xs">
                     {language === 'kn' ? 'ಸಕ್ರಿಯ' : 'ACTIVE'}
                   </span>
                 </div>
               )}
             </div>
             
-            {/* Video Container with Enhanced UI */}
-            <div className="relative bg-gradient-to-br from-gray-900 to-black rounded-2xl overflow-hidden aspect-video mb-6 shadow-2xl border-4 border-green-500">
+            {/* Video Container - Larger for Mobile */}
+            <div className="relative bg-gradient-to-br from-gray-900 to-black rounded-xl overflow-hidden shadow-2xl border-4 border-green-500" style={{ aspectRatio: '4/3', minHeight: '300px' }}>
               <video
                 ref={videoRef}
                 autoPlay
@@ -433,69 +454,41 @@ Provide clear, actionable advice for farmers.`;
                 className="absolute top-0 left-0 w-full h-full pointer-events-none"
               />
               
-              {/* Camera Inactive Overlay */}
+              {/* Camera Inactive Overlay - Simplified */}
               {!isCameraActive && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-white bg-gradient-to-br from-green-900/90 to-emerald-900/90 backdrop-blur-sm">
-                  <div className="text-8xl mb-4 animate-bounce">📷</div>
-                  <h3 className="text-3xl font-bold mb-2">
-                    {language === 'kn' ? 'ಕ್ಯಾಮೆರಾ ಸಿದ್ಧವಾಗಿದೆ' : 'Camera Ready'}
+                  <div className="text-6xl mb-3">📷</div>
+                  <h3 className="text-2xl font-bold mb-2">
+                    {language === 'kn' ? 'ಕ್ಯಾಮೆರಾ ಸಿದ್ಧ' : 'Camera Ready'}
                   </h3>
-                  <p className="text-xl opacity-90 text-center px-4">
+                  <p className="text-base opacity-90 text-center px-4">
                     {language === 'kn' 
-                      ? 'ಪ್ರಾರಂಭಿಸಲು ಕೆಳಗಿನ ಬಟನ್ ಕ್ಲಿಕ್ ಮಾಡಿ'
-                      : 'Click button below to start scanning'
+                      ? 'ಪ್ರಾರಂಭಿಸಲು ಬಟನ್ ಒತ್ತಿ'
+                      : 'Press button to start'
                     }
                   </p>
                 </div>
               )}
               
-              {/* Live Status Indicator */}
-              {isCameraActive && (
-                <div className="absolute top-4 left-4 flex items-center gap-3">
-                  <div className={`${isScanning ? 'bg-red-500' : 'bg-orange-500'} px-4 py-2 rounded-full text-white font-bold text-sm shadow-lg border-2 border-white flex items-center gap-2`}>
-                    <div className={`w-3 h-3 ${isScanning ? 'bg-white' : 'bg-yellow-300'} rounded-full ${isScanning ? 'animate-pulse' : ''}`}></div>
-                    {isScanning ? (language === 'kn' ? 'ಲೈವ್ ಸ್ಕ್ಯಾನಿಂಗ್' : 'LIVE SCANNING') : (language === 'kn' ? 'ವಿರಾಮ' : 'PAUSED')}
-                  </div>
-                  <div className="bg-blue-500/90 px-4 py-2 rounded-full text-white font-bold text-sm shadow-lg border-2 border-white">
-                    {detections.length} {language === 'kn' ? 'ಪತ್ತೆಗಳು' : 'Detections'}
-                  </div>
+              {/* Live Status - Compact */}
+              {isCameraActive && isScanning && (
+                <div className="absolute top-2 left-2 bg-red-500 px-3 py-1 rounded-full text-white font-bold text-xs shadow-lg flex items-center gap-2">
+                  <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                  {language === 'kn' ? 'ಸ್ಕ್ಯಾನಿಂಗ್' : 'SCANNING'}
                 </div>
               )}
               
-              {/* Real-Time Detection Stats - Enhanced */}
+              {/* Detection Stats - Mobile Optimized */}
               {detections.length > 0 && (
-                <div className="absolute bottom-4 right-4 bg-black/85 backdrop-blur-md text-white px-4 py-3 rounded-xl shadow-2xl border-2 border-white/30">
-                  <div className="text-xs font-bold mb-2 text-center opacity-75">
-                    {language === 'kn' ? 'ನೈಜ-ಸಮಯದ ಪತ್ತೆಗಳು' : 'REAL-TIME DETECTIONS'}
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-red-500 rounded shadow-lg"></div>
-                        <span className="text-sm font-semibold">{language === 'kn' ? 'ರೋಗಗ್ರಸ್ತ' : 'Diseased'}</span>
-                      </div>
-                      <span className="text-lg font-bold bg-red-500 px-3 py-1 rounded-full">
-                        {detections.filter(d => d.severity === 'diseased').length}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-yellow-500 rounded shadow-lg"></div>
-                        <span className="text-sm font-semibold">{language === 'kn' ? 'ಮಧ್ಯಮ' : 'Moderate'}</span>
-                      </div>
-                      <span className="text-lg font-bold bg-yellow-500 px-3 py-1 rounded-full text-black">
-                        {detections.filter(d => d.severity === 'moderate').length}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-green-500 rounded shadow-lg"></div>
-                        <span className="text-sm font-semibold">{language === 'kn' ? 'ಆರೋಗ್ಯಕರ' : 'Healthy'}</span>
-                      </div>
-                      <span className="text-lg font-bold bg-green-500 px-3 py-1 rounded-full">
-                        {detections.filter(d => d.severity === 'healthy').length}
-                      </span>
-                    </div>
+                <div className="absolute bottom-2 right-2 bg-black/80 backdrop-blur-sm text-white px-2 py-1 rounded-lg text-xs">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-full ${
+                      detections[0].severity === 'diseased' ? 'bg-red-500' :
+                      detections[0].severity === 'moderate' ? 'bg-yellow-500' :
+                      'bg-green-500'
+                    }`}></div>
+                    <span className="font-semibold">{detections[0].label}</span>
+                    <span className="opacity-75">{Math.round(detections[0].confidence * 100)}%</span>
                   </div>
                 </div>
               )}

@@ -9,8 +9,10 @@ import { getGreenGramPosts, addGreenGramPost, deleteGreenGramPost, clearGreenGra
 import Modal from '../components/Modal';
 import { fetchPlantPostsFromPexels } from '../services/pexelsService';
 import { FaHeart, FaRegHeart, FaRegThumbsDown, FaThumbsDown, FaWhatsapp } from 'react-icons/fa';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const CommunityHubPage: React.FC = () => {
+  const { language } = useLanguage();
   const [posts, setPosts] = useState<GreenGramPost[]>([]);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -56,7 +58,7 @@ const CommunityHubPage: React.FC = () => {
     }
     setIsGeneratingCaption(true);
     setError(null);
-    const result = await generateCaptionForImage(imageBase64, imageFile.type);
+    const result = await generateCaptionForImage(imageBase64, imageFile.type, language);
     if (result.error) {
       setError(result.error);
     } else {

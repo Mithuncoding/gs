@@ -592,6 +592,7 @@ const FarmerConnectPage: React.FC = () => {
           value={mapStyle}
           onChange={e => setMapStyle(e.target.value as 'default' | 'dark' | 'satellite')}
           className="p-2 rounded border border-gray-300 shadow-sm"
+          title="Map Style"
         >
           <option value="default">Default</option>
           <option value="dark">Dark</option>

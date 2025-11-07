@@ -252,7 +252,9 @@ const EncyclopediaPage: React.FC = () => {
                   className="bg-white px-4 py-2 rounded-lg shadow-md hover:shadow-xl transition-all hover:scale-105 flex items-center gap-2"
                 >
                   <span className="text-2xl">{plant.image}</span>
-                  <span className="font-semibold text-green-700">{plant.name}</span>
+                  <span className="font-semibold text-green-700">
+                    {language === 'kn' && plant.nameKannada ? plant.nameKannada : plant.name}
+                  </span>
                 </button>
               ))}
             </div>
@@ -285,9 +287,13 @@ const EncyclopediaPage: React.FC = () => {
                     <div className="text-7xl mb-2 transform group-hover:scale-110 transition-transform">{plant.image}</div>
                   </div>
                   <div className="p-4">
-                    <h3 className="text-xl font-bold text-green-700 mb-1">{plant.name}</h3>
+                    <h3 className="text-xl font-bold text-green-700 mb-1">
+                      {language === 'kn' && plant.nameKannada ? plant.nameKannada : plant.name}
+                    </h3>
                     <p className="text-sm italic text-gray-500 mb-2">{plant.scientificName}</p>
-                    <p className="text-sm text-gray-600 line-clamp-2 mb-3">{plant.description}</p>
+                    <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+                      {language === 'kn' && plant.descriptionKannada ? plant.descriptionKannada : plant.description}
+                    </p>
                     <div className="flex flex-wrap gap-2 mb-3">
                       <span className={`text-xs px-2 py-1 rounded-full border ${difficultyColors[plant.difficulty]}`}>
                         {plant.difficulty}
@@ -321,7 +327,9 @@ const EncyclopediaPage: React.FC = () => {
               <div className="flex items-center gap-6">
                 <div className="text-8xl">{selectedPlant.image}</div>
                 <div>
-                  <h2 className="text-4xl font-bold mb-2">{selectedPlant.name}</h2>
+                  <h2 className="text-4xl font-bold mb-2">
+                    {language === 'kn' && selectedPlant.nameKannada ? selectedPlant.nameKannada : selectedPlant.name}
+                  </h2>
                   <p className="text-xl italic opacity-90">{selectedPlant.scientificName}</p>
                   <div className="flex gap-2 mt-3">
                     <span className={`px-3 py-1 rounded-full text-sm font-bold ${difficultyColors[selectedPlant.difficulty]} bg-white`}>
@@ -339,10 +347,14 @@ const EncyclopediaPage: React.FC = () => {
             <div className="p-8 max-h-[70vh] overflow-y-auto">
               {/* Description & Fun Fact */}
               <div className="mb-6 bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-xl border-2 border-blue-200">
-                <p className="text-lg text-gray-700 mb-4">{selectedPlant.description}</p>
+                <p className="text-lg text-gray-700 mb-4">
+                  {language === 'kn' && selectedPlant.descriptionKannada ? selectedPlant.descriptionKannada : selectedPlant.description}
+                </p>
                 <div className="bg-yellow-100 border-l-4 border-yellow-500 p-4 rounded">
                   <p className="font-bold text-yellow-800 mb-1 text-sm">{translate('plantDetailFunFact')}</p>
-                  <p className="text-gray-700">{selectedPlant.funFact}</p>
+                  <p className="text-gray-700">
+                    {language === 'kn' && selectedPlant.funFactKannada ? selectedPlant.funFactKannada : selectedPlant.funFact}
+                  </p>
                 </div>
               </div>
 

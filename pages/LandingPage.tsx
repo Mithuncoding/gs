@@ -17,46 +17,46 @@ const LandingPage: React.FC = () => {
   const features: Feature[] = [
     {
       emoji: '🔍',
-      title: 'Instant Analysis',
-      desc: 'Real-time plant disease detection using advanced AI technology',
+      title: translate('featureInstantAnalysisTitle'),
+      desc: translate('featureInstantAnalysisDesc'),
     },
     {
       emoji: '💊',
-      title: 'Treatment Guide',
-      desc: 'Detailed treatment recommendations and preventive measures',
+      title: translate('featureTreatmentGuideTitle'),
+      desc: translate('featureTreatmentGuideDesc'),
     },
     {
       emoji: '📱',
-      title: 'Easy to Use',
-      desc: 'Simple interface with camera and upload options',
+      title: translate('featureEasyToUseTitle'),
+      desc: translate('featureEasyToUseDesc'),
     },
     {
       emoji: '📊',
-      title: 'Analysis History',
-      desc: 'Track all your previous plant analyses',
+      title: translate('featureAnalysisHistoryTitle'),
+      desc: translate('featureAnalysisHistoryDesc'),
     },
   ];
 
   const moreFeatures: Feature[] = [
     {
       emoji: '🌐',
-      title: 'Multilingual Support',
-      desc: 'Access the app in 100+ languages for global reach',
+      title: translate('featureMultilingualTitle'),
+      desc: translate('featureMultilingualDesc'),
     },
     {
       emoji: '🌦️',
-      title: 'Weather Insights',
-      desc: 'Get real-time weather data and farming advice',
+      title: translate('featureWeatherInsightsTitle'),
+      desc: translate('featureWeatherInsightsDesc'),
     },
     {
       emoji: '🔔',
-      title: 'Smart Notifications',
-      desc: 'Personalized reminders for plant care and updates',
+      title: translate('featureSmartNotificationsTitle'),
+      desc: translate('featureSmartNotificationsDesc'),
     },
     {
       emoji: '🤝',
-      title: 'Community Hub',
-      desc: 'Connect, share, and learn with fellow plant lovers',
+      title: translate('featureCommunityTitle'),
+      desc: translate('featureCommunityDesc'),
     },
   ];
 
@@ -74,13 +74,13 @@ const LandingPage: React.FC = () => {
           {translate('appCatchphrase')}
         </p>
         <Link to="/scan" className="inline-block px-10 py-4 bg-green-600 text-white text-xl font-bold rounded-full shadow-lg hover:scale-105 hover:bg-green-700 transition-all duration-300">
-          Get Started
+          {translate('getStarted')}
         </Link>
       </section>
 
       {/* Features Section */}
       <section className="w-full py-12 px-2 bg-gradient-to-b from-white to-green-50">
-        <h2 className="text-4xl font-bold text-gray-800 text-center mb-12">Key Features</h2>
+        <h2 className="text-4xl font-bold text-gray-800 text-center mb-12">{translate('keyFeatures')}</h2>
         <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-8">
           {features.map((f, i) => (
             <div
@@ -109,25 +109,25 @@ const LandingPage: React.FC = () => {
         </div>
 
         {/* How It Works Section */}
-        <h2 className="text-4xl font-bold text-gray-800 text-center mb-12">How It Works</h2>
+        <h2 className="text-4xl font-bold text-gray-800 text-center mb-12">{translate('howItWorks')}</h2>
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-stretch justify-center gap-8 relative">
           {/* Connecting line (desktop only) */}
           <div className="hidden md:block absolute left-0 right-0 top-1/2 h-0.5 bg-green-200 z-0" style={{marginTop: '-1px'}} />
           {[
             {
               num: 1,
-              title: 'Upload Image',
-              desc: 'Take a photo or upload an image of your plant for instant analysis',
+              title: translate('stepUploadImageTitle'),
+              desc: translate('stepUploadImageDesc'),
             },
             {
               num: 2,
-              title: 'AI Analysis',
-              desc: 'Our advanced AI technology analyzes your plant for diseases and health issues',
+              title: translate('stepAIAnalysisTitle'),
+              desc: translate('stepAIAnalysisDesc'),
             },
             {
               num: 3,
-              title: 'Get Results',
-              desc: 'Receive detailed diagnosis and personalized treatment recommendations',
+              title: translate('stepGetResultsTitle'),
+              desc: translate('stepGetResultsDesc'),
             },
           ].map((step, i) => (
             <div key={step.num} className="relative bg-white rounded-3xl shadow-xl flex-1 p-8 flex flex-col items-center text-center z-10 animate-fade-in-up" style={{ animationDelay: `${i * 0.15 + 0.2}s` }}>

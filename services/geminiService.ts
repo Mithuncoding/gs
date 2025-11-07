@@ -42,9 +42,13 @@ const parseJsonFromGeminiResponse = <T,>(text: string): T | { error: string } =>
   }
 };
 
-export const diagnosePlant = async (imageBase64: string, mimeType: string, customPrompt?: string): Promise<PlantDiagnosis> => {
+export const diagnosePlant = async (imageBase64: string, mimeType: string, customPrompt?: string, language: string = 'en'): Promise<PlantDiagnosis> => {
   const defaultReturn: PlantDiagnosis = { condition: "", diseaseName: "", careSuggestions: [], confidenceLevel: "" };
   if (!API_KEY) return { ...defaultReturn, error: "API Key not configured." };
+  
+  const languageInstruction = language === 'kn' 
+    ? '\n\nIMPORTANT: Respond to ALL text fields (plantName, condition, diseaseName, careSuggestions, confidenceLevel, etc.) in KANNADA language (ಕನ್ನಡ). Use Kannada script for all responses except JSON keys and emoji values.'
+    : '\n\nRespond to all text fields in English.';
   
   try {
     // If no image and no mimeType, use text model for prompt correction
@@ -76,7 +80,7 @@ export const diagnosePlant = async (imageBase64: string, mimeType: string, custo
 7. "careSuggestions": (array of strings, practical, actionable tips as bullet points. If "Healthy" or "Unknown", provide general care tips or state "N/A").
 8. "confidenceLevel": (string, e.g., "High", "Medium", "Low", or "N/A if not a plant").
 9. "confidencePercent": (number, 0-100, your confidence in the disease diagnosis).
-Respond with ONLY ONE JSON object. Do NOT return multiple objects or extra text. Do NOT repeat the keys. If the image is not a plant, set plantName to "Unknown", plantEmoji to "🪴", plantConfidencePercent to 0, condition to "Unknown", statusTag to "Unknown", and other relevant fields to "N/A".`;
+Respond with ONLY ONE JSON object. Do NOT return multiple objects or extra text. Do NOT repeat the keys. If the image is not a plant, set plantName to "Unknown", plantEmoji to "🪴", plantConfidencePercent to 0, condition to "Unknown", statusTag to "Unknown", and other relevant fields to "N/A".${languageInstruction}`;
     const textPart = {
       text: customPrompt ? `${customPrompt} ${basePrompt}` : basePrompt,
     };
@@ -110,11 +114,16 @@ Respond with ONLY ONE JSON object. Do NOT return multiple objects or extra text.
   }
 };
 
-export const getEncyclopediaEntry = async (plantName: string): Promise<EncyclopediaEntry> => {
+export const getEncyclopediaEntry = async (plantName: string, language: string = 'en'): Promise<EncyclopediaEntry> => {
   const defaultReturn: EncyclopediaEntry = { plantName, summary:"", sunlight:"", watering:"", care:"", commonDiseases:""};
   if (!API_KEY) return { ...defaultReturn, error: "API Key not configured."};
+  
+  const languageInstruction = language === 'kn' 
+    ? ' Respond to ALL text fields (summary, sunlight, watering, care, commonDiseases) in KANNADA language (ಕನ್ನಡ). Use Kannada script for all responses except JSON keys.'
+    : ' Respond to all text fields in English.';
+  
   try {
-    const prompt = `Provide an encyclopedia-style summary for the plant "${plantName}". Respond ONLY in JSON format with the following keys: "plantName" (string), "summary" (string), "sunlight" (string), "watering" (string), "care" (string), "commonDiseases" (string). If the plant is not found, return an error message under an "error" key, and set other fields to "N/A" or empty strings.`;
+    const prompt = `Provide an encyclopedia-style summary for the plant "${plantName}". Respond ONLY in JSON format with the following keys: "plantName" (string), "summary" (string), "sunlight" (string), "watering" (string), "care" (string), "commonDiseases" (string). If the plant is not found, return an error message under an "error" key, and set other fields to "N/A" or empty strings.${languageInstruction}`;
     
     const response: GenerateContentResponse = await ai.models.generateContent({
       model: GEMINI_TEXT_MODEL,
@@ -137,11 +146,16 @@ export const getEncyclopediaEntry = async (plantName: string): Promise<Encyclope
   }
 };
 
-export const getCropInsights = async (district: string, month: string): Promise<CropInsight> => {
+export const getCropInsights = async (district: string, month: string, language: string = 'en'): Promise<CropInsight> => {
   const defaultReturn: CropInsight = { district, month, suitableCrops:[], tips:"", climatePatterns:"", allCrops:[] };
   if (!API_KEY) return { ...defaultReturn, error: "API Key not configured." };
+  
+  const languageInstruction = language === 'kn' 
+    ? '\n\nIMPORTANT: You MUST respond to ALL text fields in KANNADA language (ಕನ್ನಡ) ONLY. Write crop names in Kannada (ಟೊಮೇಟೊ, ಅಕ್ಕಿ, ಗೋಧಿ, etc.), tips in Kannada, and climatePatterns in Kannada. Use Kannada script (ಕನ್ನಡ ಲಿಪಿ) for everything except the JSON keys themselves. DO NOT use English for any content.'
+    : ' Respond to all text fields in English.';
+  
   try {
-    const prompt = `For ${district} district in Karnataka, during the month of ${month}, what are the most suitable crops to grow? Respond ONLY in JSON format with keys: "district" (string), "month" (string), "suitableCrops" (array of strings), "allCrops" (array of all major crops grown in this district/month, not just suitable ones), "tips" (string, general farming tips for these crops in this context), "climatePatterns" (string, typical climate patterns for this district and month).`;
+    const prompt = `For ${district} district in Karnataka, during the month of ${month}, what are the most suitable crops to grow? Respond ONLY in JSON format with keys: "district" (string), "month" (string), "suitableCrops" (array of strings), "allCrops" (array of all major crops grown in this district/month, not just suitable ones), "tips" (string, general farming tips for these crops in this context), "climatePatterns" (string, typical climate patterns for this district and month).${languageInstruction}`;
     
     const response: GenerateContentResponse = await ai.models.generateContent({
       model: GEMINI_TEXT_MODEL,
@@ -168,11 +182,16 @@ export const getCropInsights = async (district: string, month: string): Promise<
   }
 };
 
-export const getWeatherBasedAdvice = async (weatherJson: string, context: string): Promise<FarmingAdvice> => {
+export const getWeatherBasedAdvice = async (weatherJson: string, context: string, language: string = 'en'): Promise<FarmingAdvice> => {
   const defaultReturn: FarmingAdvice = { advice: "" };
   if (!API_KEY) return { ...defaultReturn, error: "API Key not configured." };
+  
+  const languageInstruction = language === 'kn' 
+    ? '\n\nCRITICAL INSTRUCTION: You MUST write the entire advice in KANNADA language (ಕನ್ನಡ) using Kannada script (ಕನ್ನಡ ಲಿಪಿ). DO NOT use English for the advice content. Write everything in Kannada including crop names, weather terms, and all recommendations.'
+    : ' Respond to the advice field in English.';
+  
   try {
-    const prompt = `Given the following weather data for ${context}: ${weatherJson}. You are a strict, highly experienced agricultural advisor. If the crop or farming context is NOT suitable for the current weather, location, or season (for example, rice in a dry region like Sidlaghatta), you must give a very clear, strict, and lengthy warning. Explain in detail why it is not suitable, including water, soil, and climate requirements, and strongly advise the farmer to avoid this crop. Suggest better alternatives if possible. Do NOT sugar-coat or encourage unsuitable choices. If the crop is suitable, provide a detailed, practical, and actionable plan for today. Respond ONLY in JSON format with one key: "advice" (string, at least 5-10 sentences if warning, and always detailed).`;
+    const prompt = `Given the following weather data for ${context}: ${weatherJson}. You are a strict, highly experienced agricultural advisor. If the crop or farming context is NOT suitable for the current weather, location, or season (for example, rice in a dry region like Sidlaghatta), you must give a very clear, strict, and lengthy warning. Explain in detail why it is not suitable, including water, soil, and climate requirements, and strongly advise the farmer to avoid this crop. Suggest better alternatives if possible. Do NOT sugar-coat or encourage unsuitable choices. If the crop is suitable, provide a detailed, practical, and actionable plan for today. Respond ONLY in JSON format with one key: "advice" (string, at least 5-10 sentences if warning, and always detailed).${languageInstruction}`;
     
     const response: GenerateContentResponse = await ai.models.generateContent({
       model: GEMINI_TEXT_MODEL,
@@ -195,8 +214,13 @@ export const getWeatherBasedAdvice = async (weatherJson: string, context: string
   }
 };
 
-export const generateCaptionForImage = async (imageBase64: string, mimeType: string): Promise<{ caption: string; error?: string }> => {
+export const generateCaptionForImage = async (imageBase64: string, mimeType: string, language: string = 'en'): Promise<{ caption: string; error?: string }> => {
   if (!API_KEY) return { caption: "", error: "API Key not configured."};
+  
+  const languageInstruction = language === 'kn' 
+    ? ' Write the caption in KANNADA language (ಕನ್ನಡ). Use Kannada script for the entire caption.'
+    : ' Write the caption in English.';
+  
   try {
     const imagePart: ImagePart = {
       inlineData: {
@@ -205,7 +229,7 @@ export const generateCaptionForImage = async (imageBase64: string, mimeType: str
       },
     };
     const textPart = {
-      text: `Generate a fun, engaging, and informative Instagram-style caption for this plant photo. Keep it concise (1-3 sentences). Respond ONLY in JSON format with one key: "caption" (string).`,
+      text: `Generate a fun, engaging, and informative Instagram-style caption for this plant photo. Keep it concise (1-3 sentences). Respond ONLY in JSON format with one key: "caption" (string).${languageInstruction}`,
     };
 
     const response: GenerateContentResponse = await ai.models.generateContent({
@@ -236,12 +260,18 @@ export const getFertPestQuantitiesAI = async (
   district: string,
   month: string,
   weather: WeatherData,
-  acres: number
+  acres: number,
+  language: string = 'en'
 ): Promise<FertPestQuantitiesAIResponse> => {
   const defaultReturn: FertPestQuantitiesAIResponse = { fertilizers: [], pesticides: [] };
   if (!API_KEY) return { ...defaultReturn, error: "API Key not configured." };
+  
+  const languageInstruction = language === 'kn' 
+    ? '\n\nIMPORTANT: You MUST write all fertilizer and pesticide names in KANNADA (ಕನ್ನಡ). Use Kannada script for all text. For example: "ಯೂರಿಯಾ", "ಡಿಎಪಿ", "ಪೊಟ್ಯಾಶ್", etc.'
+    : '\n\nRespond with fertilizer and pesticide names in English.';
+  
   try {
-    const prompt = `You are an expert agricultural advisor. For the following context, recommend the best fertilizers and pesticides for the crop, and specify the recommended quantity per acre (in decimals, not just whole numbers, and in appropriate units like kg or L). Also, calculate the total quantity for ${acres} acres. Respond in JSON as:\n{\n  \"fertilizers\": [{\"name\": \"...\", \"per_acre\": ..., \"unit\": \"...\", \"total\": ...}],\n  \"pesticides\": [{\"name\": \"...\", \"per_acre\": ..., \"unit\": \"...\", \"total\": ...}]\n}\nContext:\nCrop: ${crop}\nDistrict: ${district}\nMonth: ${month}\nWeather: ${JSON.stringify(weather)}\n`;
+    const prompt = `You are an expert agricultural advisor. For the following context, recommend the best fertilizers and pesticides for the crop, and specify the recommended quantity per acre (in decimals, not just whole numbers, and in appropriate units like kg or L). Also, calculate the total quantity for ${acres} acres. Respond in JSON as:\n{\n  \"fertilizers\": [{\"name\": \"...\", \"per_acre\": ..., \"unit\": \"...\", \"total\": ...}],\n  \"pesticides\": [{\"name\": \"...\", \"per_acre\": ..., \"unit\": \"...\", \"total\": ...}]\n}\nContext:\nCrop: ${crop}\nDistrict: ${district}\nMonth: ${month}\nWeather: ${JSON.stringify(weather)}${languageInstruction}\n`;
     const response: GenerateContentResponse = await ai.models.generateContent({
       model: GEMINI_TEXT_MODEL,
       contents: prompt,
@@ -262,8 +292,12 @@ export const getFertPestQuantitiesAI = async (
 };
 
 // Generic image analysis function for AR disease detection
-export const analyzeImage = async (imageBase64: string, prompt: string): Promise<string> => {
+export const analyzeImage = async (imageBase64: string, prompt: string, language: string = 'en'): Promise<string> => {
   if (!API_KEY) return "API Key not configured.";
+  
+  const languageInstruction = language === 'kn' 
+    ? '\n\nIMPORTANT: Respond in KANNADA language (ಕನ್ನಡ). Use Kannada script for all text responses.'
+    : '\n\nRespond in English.';
   
   try {
     // Extract base64 data
@@ -282,7 +316,7 @@ export const analyzeImage = async (imageBase64: string, prompt: string): Promise
       contents: [
         {
           role: 'user',
-          parts: [{ text: prompt }, imagePart]
+          parts: [{ text: prompt + languageInstruction }, imagePart]
         }
       ]
     });

@@ -32,6 +32,36 @@ export const translations: LanguagePack = {
 
     // Landing Page
     appCatchphrase: "Your intelligent partner for nurturing healthy plants. Leverage AI to diagnose, learn, and grow with confidence.",
+    getStarted: "Get Started",
+    keyFeatures: "Key Features",
+    howItWorks: "How It Works",
+    
+    // Landing Page - Features
+    featureInstantAnalysisTitle: "Instant Analysis",
+    featureInstantAnalysisDesc: "Real-time plant disease detection using advanced AI technology",
+    featureTreatmentGuideTitle: "Treatment Guide",
+    featureTreatmentGuideDesc: "Detailed treatment recommendations and preventive measures",
+    featureEasyToUseTitle: "Easy to Use",
+    featureEasyToUseDesc: "Simple interface with camera and upload options",
+    featureAnalysisHistoryTitle: "Analysis History",
+    featureAnalysisHistoryDesc: "Track all your previous plant analyses",
+    featureMultilingualTitle: "Multilingual Support",
+    featureMultilingualDesc: "Access the app in 100+ languages for global reach",
+    featureWeatherInsightsTitle: "Weather Insights",
+    featureWeatherInsightsDesc: "Get real-time weather data and farming advice",
+    featureSmartNotificationsTitle: "Smart Notifications",
+    featureSmartNotificationsDesc: "Personalized reminders for plant care and updates",
+    featureCommunityTitle: "Community Hub",
+    featureCommunityDesc: "Connect, share, and learn with fellow plant lovers",
+    
+    // Landing Page - How It Works Steps
+    stepUploadImageTitle: "Upload Image",
+    stepUploadImageDesc: "Take a photo or upload an image of your plant for instant analysis",
+    stepAIAnalysisTitle: "AI Analysis",
+    stepAIAnalysisDesc: "Our advanced AI technology analyzes your plant for diseases and health issues",
+    stepGetResultsTitle: "Get Results",
+    stepGetResultsDesc: "Receive detailed diagnosis and personalized treatment recommendations",
+    
     featureScanTitle: "Instant Plant Health Scan",
     featureScanDesc: "Upload a photo and get an AI-powered health diagnosis and care tips for your plant in seconds.",
     featureEncyclopediaTitle: "Plant Encyclopedia",
@@ -48,6 +78,21 @@ export const translations: LanguagePack = {
     // Plant Scan Page
     plantScanTitle: "Instant Plant Health Scan",
     plantScanDescription: "Upload or drag & drop a photo of your plant. Our AI will analyze its health and provide care suggestions.",
+    
+    // Plant Categories - English
+    categoryAllPlants: "All Plants",
+    categoryCerealsMillets: "Cereals & Millets",
+    categoryPulses: "Pulses",
+    categoryVegetablesPlural: "Vegetables",
+    categoryFruitsPlural: "Fruits",
+    categorySpices: "Spices",
+    categoryCommercialCrops: "Commercial Crops",
+    categoryOrnamentalPlants: "Ornamental Plants",
+    categoryMedicinalPlants: "Medicinal Plants",
+    categoryTreesPlural: "Trees",
+    categoryUnknownPlant: "Unknown Plant",
+    uploadAnyPlantMessage: "Upload any plant image to identify and diagnose",
+    
     uploadImagePrompt: "Upload Plant Image",
     advancedOptions: "Advanced Options (Optional)",
     customPromptPlaceholder: "Enter a custom prompt, or leave blank for default.",
@@ -218,8 +263,19 @@ export const translations: LanguagePack = {
     // Crop Insights Page
     cropInsightsTitle: "Crop Insights for Karnataka",
     cropInsightsDescription: "Get AI-powered recommendations for suitable crops based on district, month, and climate conditions.",
+    combinedCropWeatherTitle: "Combined Crop & Weather Insights",
+    getAIPoweredRec: "Get AI-powered crop recommendations that are",
+    personalizedRealTime: "personalized for real-time weather",
+    inYourDistrict: "in your district!",
+    district: "District",
+    cityTown: "City/Town",
+    month: "Month",
+    cropOptional: "Crop (optional)",
+    acres: "Acres",
+    getCombinedInsights: "Get Combined Insights",
     selectDistrict: "Select District",
     selectMonth: "Select Month",
+    selectCrop: "-- Select Crop --",
     getCropRecommendations: "Get Crop Recommendations",
     fetchingRecommendations: "Fetching crop recommendations...",
     recommendedCrops: "Recommended Crops",
@@ -246,7 +302,21 @@ export const translations: LanguagePack = {
     noPostsYet: "No posts yet. Be the first to share!",
     likes: "Likes",
     likePost: "Like",
-    deletePost: "Delete Post"
+    deletePost: "Delete Post",
+    
+    // Month Names - English
+    monthJanuary: "January",
+    monthFebruary: "February",
+    monthMarch: "March",
+    monthApril: "April",
+    monthMay: "May",
+    monthJune: "June",
+    monthJuly: "July",
+    monthAugust: "August",
+    monthSeptember: "September",
+    monthOctober: "October",
+    monthNovember: "November",
+    monthDecember: "December"
   },
   
   kn: {
@@ -280,6 +350,36 @@ export const translations: LanguagePack = {
 
     // Landing Page - ಮುಖಪುಟ
     appCatchphrase: "ಆರೋಗ್ಯಕರ ಸಸ್ಯಗಳನ್ನು ಪೋಷಿಸಲು ನಿಮ್ಮ ಬುದ್ಧಿವಂತ ಸಹಚರ. AI ಬಳಸಿ ರೋಗನಿರ್ಣಯ ಮಾಡಿ, ಕಲಿಯಿರಿ ಮತ್ತು ವಿಶ್ವಾಸದಿಂದ ಬೆಳೆಯಿರಿ.",
+    getStarted: "ಪ್ರಾರಂಭಿಸಿ",
+    keyFeatures: "ಪ್ರಮುಖ ವೈಶಿಷ್ಟ್ಯಗಳು",
+    howItWorks: "ಇದು ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ",
+    
+    // Landing Page - Features - ವೈಶಿಷ್ಟ್ಯಗಳು
+    featureInstantAnalysisTitle: "ತ್ವರಿತ ವಿಶ್ಲೇಷಣೆ",
+    featureInstantAnalysisDesc: "ಸುಧಾರಿತ AI ತಂತ್ರಜ್ಞಾನವನ್ನು ಬಳಸಿಕೊಂಡು ನೈಜ-ಸಮಯದ ಸಸ್ಯ ರೋಗ ಪತ್ತೆ",
+    featureTreatmentGuideTitle: "ಚಿಕಿತ್ಸೆ ಮಾರ್ಗದರ್ಶಿ",
+    featureTreatmentGuideDesc: "ವಿವರವಾದ ಚಿಕಿತ್ಸೆ ಶಿಫಾರಸುಗಳು ಮತ್ತು ತಡೆಗಟ್ಟುವ ಕ್ರಮಗಳು",
+    featureEasyToUseTitle: "ಬಳಸಲು ಸುಲಭ",
+    featureEasyToUseDesc: "ಕ್ಯಾಮೆರಾ ಮತ್ತು ಅಪ್‌ಲೋಡ್ ಆಯ್ಕೆಗಳೊಂದಿಗೆ ಸರಳ ಇಂಟರ್ಫೇಸ್",
+    featureAnalysisHistoryTitle: "ವಿಶ್ಲೇಷಣೆ ಇತಿಹಾಸ",
+    featureAnalysisHistoryDesc: "ನಿಮ್ಮ ಎಲ್ಲಾ ಹಿಂದಿನ ಸಸ್ಯ ವಿಶ್ಲೇಷಣೆಗಳನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಿ",
+    featureMultilingualTitle: "ಬಹುಭಾಷಾ ಬೆಂಬಲ",
+    featureMultilingualDesc: "ಜಾಗತಿಕ ವ್ಯಾಪ್ತಿಗಾಗಿ 100+ ಭಾಷೆಗಳಲ್ಲಿ ಅಪ್ಲಿಕೇಶನ್ ಪ್ರವೇಶಿಸಿ",
+    featureWeatherInsightsTitle: "ಹವಾಮಾನ ಒಳನೋಟಗಳು",
+    featureWeatherInsightsDesc: "ನೈಜ-ಸಮಯದ ಹವಾಮಾನ ಮಾಹಿತಿ ಮತ್ತು ಕೃಷಿ ಸಲಹೆಯನ್ನು ಪಡೆಯಿರಿ",
+    featureSmartNotificationsTitle: "ಸ್ಮಾರ್ಟ್ ಅಧಿಸೂಚನೆಗಳು",
+    featureSmartNotificationsDesc: "ಸಸ್ಯ ಆರೈಕೆ ಮತ್ತು ನವೀಕರಣಗಳಿಗಾಗಿ ವೈಯಕ್ತಿಕಗೊಳಿಸಿದ ಜ್ಞಾಪನೆಗಳು",
+    featureCommunityTitle: "ಸಮುದಾಯ ಕೇಂದ್ರ",
+    featureCommunityDesc: "ಸಹ ಸಸ್ಯ ಪ್ರೇಮಿಗಳೊಂದಿಗೆ ಸಂಪರ್ಕ ಸಾಧಿಸಿ, ಹಂಚಿಕೊಳ್ಳಿ ಮತ್ತು ಕಲಿಯಿರಿ",
+    
+    // Landing Page - How It Works Steps - ಹಂತಗಳು
+    stepUploadImageTitle: "ಚಿತ್ರ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ",
+    stepUploadImageDesc: "ತ್ವರಿತ ವಿಶ್ಲೇಷಣೆಗಾಗಿ ನಿಮ್ಮ ಸಸ್ಯದ ಫೋಟೋ ತೆಗೆಯಿರಿ ಅಥವಾ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ",
+    stepAIAnalysisTitle: "AI ವಿಶ್ಲೇಷಣೆ",
+    stepAIAnalysisDesc: "ನಮ್ಮ ಸುಧಾರಿತ AI ತಂತ್ರಜ್ಞಾನವು ರೋಗಗಳು ಮತ್ತು ಆರೋಗ್ಯ ಸಮಸ್ಯೆಗಳಿಗಾಗಿ ನಿಮ್ಮ ಸಸ್ಯವನ್ನು ವಿಶ್ಲೇಷಿಸುತ್ತದೆ",
+    stepGetResultsTitle: "ಫಲಿತಾಂಶಗಳನ್ನು ಪಡೆಯಿರಿ",
+    stepGetResultsDesc: "ವಿವರವಾದ ರೋಗನಿರ್ಣಯ ಮತ್ತು ವೈಯಕ್ತಿಕಗೊಳಿಸಿದ ಚಿಕಿತ್ಸೆ ಶಿಫಾರಸುಗಳನ್ನು ಸ್ವೀಕರಿಸಿ",
+    
     featureScanTitle: "ತ್ವರಿತ ಸಸ್ಯ ಆರೋಗ್ಯ ಪರೀಕ್ಷೆ",
     featureScanDesc: "ಫೋಟೋ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ ಮತ್ತು ನಿಮ್ಮ ಸಸ್ಯಕ್ಕೆ AI-ಚಾಲಿತ ಆರೋಗ್ಯ ರೋಗನಿರ್ಣಯ ಮತ್ತು ಆರೈಕೆ ಸಲಹೆಗಳನ್ನು ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಪಡೆಯಿರಿ.",
     featureEncyclopediaTitle: "ಸಸ್ಯ ವಿಶ್ವಕೋಶ",
@@ -296,6 +396,21 @@ export const translations: LanguagePack = {
     // Plant Scan Page - ಸಸ್ಯ ಸ್ಕ್ಯಾನ್ ಪುಟ
     plantScanTitle: "ತ್ವರಿತ ಸಸ್ಯ ಆರೋಗ್ಯ ಪರೀಕ್ಷೆ",
     plantScanDescription: "ನಿಮ್ಮ ಸಸ್ಯದ ಫೋಟೋವನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ ಅಥವಾ ಡ್ರ್ಯಾಗ್ ಮತ್ತು ಡ್ರಾಪ್ ಮಾಡಿ. ನಮ್ಮ AI ಅದರ ಆರೋಗ್ಯವನ್ನು ವಿಶ್ಲೇಷಿಸುತ್ತದೆ ಮತ್ತು ಆರೈಕೆ ಸಲಹೆಗಳನ್ನು ನೀಡುತ್ತದೆ.",
+    
+    // Plant Categories - Kannada
+    categoryAllPlants: "ಎಲ್ಲಾ ಸಸ್ಯಗಳು",
+    categoryCerealsMillets: "ಧಾನ್ಯ ಮತ್ತು ರಾಗಿ",
+    categoryPulses: "ಕಾಳುಗಳು",
+    categoryVegetablesPlural: "ತರಕಾರಿಗಳು",
+    categoryFruitsPlural: "ಹಣ್ಣುಗಳು",
+    categorySpices: "ಮಸಾಲೆಗಳು",
+    categoryCommercialCrops: "ವಾಣಿಜ್ಯ ಬೆಳೆಗಳು",
+    categoryOrnamentalPlants: "ಅಲಂಕಾರಿಕ ಸಸ್ಯಗಳು",
+    categoryMedicinalPlants: "ಔಷಧೀಯ ಸಸ್ಯಗಳು",
+    categoryTreesPlural: "ಮರಗಳು",
+    categoryUnknownPlant: "ಅಪರಿಚಿತ ಸಸ್ಯ",
+    uploadAnyPlantMessage: "ಗುರುತಿಸಲು ಮತ್ತು ರೋಗನಿರ್ಣಯ ಮಾಡಲು ಯಾವುದೇ ಸಸ್ಯದ ಚಿತ್ರವನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ",
+    
     uploadImagePrompt: "ಸಸ್ಯದ ಚಿತ್ರವನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ",
     advancedOptions: "ಸುಧಾರಿತ ಆಯ್ಕೆಗಳು (ಐಚ್ಛಿಕ)",
     customPromptPlaceholder: "ಕಸ್ಟಮ್ ಪ್ರಾಂಪ್ಟ್ ನಮೂದಿಸಿ, ಅಥವಾ ಡೀಫಾಲ್ಟ್‌ಗಾಗಿ ಖಾಲಿ ಬಿಡಿ.",
@@ -466,8 +581,19 @@ export const translations: LanguagePack = {
     // Crop Insights Page - ಬೆಳೆ ಒಳನೋಟಗಳ ಪುಟ
     cropInsightsTitle: "ಕರ್ನಾಟಕಕ್ಕೆ ಬೆಳೆ ಒಳನೋಟಗಳು",
     cropInsightsDescription: "ಜಿಲ್ಲೆ, ತಿಂಗಳು ಮತ್ತು ಹವಾಮಾನ ಪರಿಸ್ಥಿತಿಗಳ ಆಧಾರದ ಮೇಲೆ ಸೂಕ್ತ ಬೆಳೆಗಳಿಗೆ AI-ಚಾಲಿತ ಶಿಫಾರಸುಗಳನ್ನು ಪಡೆಯಿರಿ.",
+    combinedCropWeatherTitle: "ಸಂಯೋಜಿತ ಬೆಳೆ ಮತ್ತು ಹವಾಮಾನ ಒಳನೋಟಗಳು",
+    getAIPoweredRec: "AI-ಚಾಲಿತ ಬೆಳೆ ಶಿಫಾರಸುಗಳನ್ನು ಪಡೆಯಿರಿ",
+    personalizedRealTime: "ನೈಜ-ಸಮಯದ ಹವಾಮಾನಕ್ಕೆ ವೈಯಕ್ತೀಕರಿಸಲಾಗಿದೆ",
+    inYourDistrict: "ನಿಮ್ಮ ಜಿಲ್ಲೆಯಲ್ಲಿ!",
+    district: "ಜಿಲ್ಲೆ",
+    cityTown: "ನಗರ/ಪಟ್ಟಣ",
+    month: "ತಿಂಗಳು",
+    cropOptional: "ಬೆಳೆ (ಐಚ್ಛಿಕ)",
+    acres: "ಎಕರೆಗಳು",
+    getCombinedInsights: "ಸಂಯೋಜಿತ ಒಳನೋಟಗಳನ್ನು ಪಡೆಯಿರಿ",
     selectDistrict: "ಜಿಲ್ಲೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
     selectMonth: "ತಿಂಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+    selectCrop: "-- ಬೆಳೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ --",
     getCropRecommendations: "ಬೆಳೆ ಶಿಫಾರಸುಗಳನ್ನು ಪಡೆಯಿರಿ",
     fetchingRecommendations: "ಬೆಳೆ ಶಿಫಾರಸುಗಳನ್ನು ತರಲಾಗುತ್ತಿದೆ...",
     recommendedCrops: "ಶಿಫಾರಸು ಮಾಡಿದ ಬೆಳೆಗಳು",
@@ -494,6 +620,20 @@ export const translations: LanguagePack = {
     noPostsYet: "ಇನ್ನೂ ಯಾವುದೇ ಪೋಸ್ಟ್‌ಗಳಿಲ್ಲ. ಹಂಚಿಕೊಳ್ಳಲು ಮೊದಲಿಗರಾಗಿ!",
     likes: "ಲೈಕ್‌ಗಳು",
     likePost: "ಲೈಕ್",
-    deletePost: "ಪೋಸ್ಟ್ ಅಳಿಸಿ"
+    deletePost: "ಪೋಸ್ಟ್ ಅಳಿಸಿ",
+    
+    // Month Names - Kannada
+    monthJanuary: "ಜನವರಿ",
+    monthFebruary: "ಫೆಬ್ರವರಿ",
+    monthMarch: "ಮಾರ್ಚ್",
+    monthApril: "ಏಪ್ರಿಲ್",
+    monthMay: "ಮೇ",
+    monthJune: "ಜೂನ್",
+    monthJuly: "ಜುಲೈ",
+    monthAugust: "ಆಗಸ್ಟ್",
+    monthSeptember: "ಸೆಪ್ಟೆಂಬರ್",
+    monthOctober: "ಅಕ್ಟೋಬರ್",
+    monthNovember: "ನವೆಂಬರ್",
+    monthDecember: "ಡಿಸೆಂಬರ್"
   }
 };

@@ -2,10 +2,11 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Card from '../components/Card';
 import Alert from '../components/Alert';
+import VoiceControls from '../components/VoiceControls';
 import { CropInsight, WeatherData, FarmingAdvice, FertPestQuantitiesAIResponse } from '../types';
 import { getCropInsights, getWeatherBasedAdvice, getFertPestQuantitiesAI } from '../services/geminiService';
 import { fetchWeather } from '../services/weatherService';
-import { KARNATAKA_DISTRICTS, MONTHS, COMMON_CROPS } from '../constants';
+import { KARNATAKA_DISTRICTS, MONTHS, COMMON_CROPS, DISTRICT_NAMES_KANNADA, MONTH_NAMES_KANNADA, CROP_NAMES_KANNADA } from '../constants';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, Legend, LineChart, Line } from 'recharts';
 import { FaCheckCircle, FaTimesCircle, FaExclamationTriangle, FaLightbulb, FaDownload } from 'react-icons/fa';
 import jsPDF from 'jspdf';
@@ -13,6 +14,8 @@ import html2canvas from 'html2canvas';
 import { WhatsappIcon } from 'react-share';
 import Confetti from 'react-confetti';
 import { fetchYouTubeThumbnails } from '../services/youtubeThumbnails';
+import { useLanguage } from '../contexts/LanguageContext';
+import { useVoiceInteraction } from '../hooks/useVoiceInteraction';
 
 // Expanded mapping of districts to major cities/towns (now with more towns)
 const DISTRICT_CITIES: Record<string, string[]> = {
@@ -46,6 +49,247 @@ const DISTRICT_CITIES: Record<string, string[]> = {
   "Uttara Kannada": ["Karwar", "Sirsi", "Dandeli", "Bhatkal", "Kumta", "Ankola", "Honnavar", "Joida", "Yellapur", "Mundgod", "Siddapur", "Haliyal", "Other (type your own)"],
   "Vijayapura (Bijapur)": ["Vijayapura", "Basavana Bagewadi", "Indi", "Sindgi", "Muddebihal", "Devar Hippargi", "Other (type your own)"],
   "Yadgir": ["Yadgir", "Shahapur", "Surpur", "Gurmitkal", "Hunsagi", "Other (type your own)"],
+};
+
+// Kannada translations for city/town names
+const CITY_NAMES_KANNADA: Record<string, string> = {
+  // Bagalkot district
+  "Bagalkot": "ಬಾಗಲಕೋಟೆ",
+  "Badami": "ಬಾದಾಮಿ",
+  "Ilkal": "ಇಳಕಲ್",
+  "Jamkhandi": "ಜಾಮಖಂಡಿ",
+  "Mudhol": "ಮುದಗಲ್",
+  "Rabkavi Banhatti": "ರಬಕವಿ ಬಾನಹಟ್ಟಿ",
+  "Guledgudda": "ಗುಳೇದಗುಡ್ಡ",
+  "Hungund": "ಹುಂಗುಂದ",
+  // Ballari district
+  "Ballari": "ಬಳ್ಳಾರಿ",
+  "Hospet": "ಹೊಸಪೇಟೆ",
+  "Sandur": "ಸಂದೂರು",
+  "Kudligi": "ಕುದಲಿಗಿ",
+  "Siruguppa": "ಸಿರುಗುಪ್ಪ",
+  "Hagaribommanahalli": "ಹಗರಿಬೊಮ್ಮನಹಳ್ಳಿ",
+  "Kampli": "ಕಂಪಳಿ",
+  "Kurugodu": "ಕುರುಗೋಡು",
+  // Belagavi district
+  "Belagavi": "ಬೆಳಗಾವಿ",
+  "Gokak": "ಗೋಕಾಕ",
+  "Chikodi": "ಚಿಕೋಡಿ",
+  "Athani": "ಅಥಣಿ",
+  "Bailhongal": "ಬೈಲಹೊಂಗಳ",
+  "Ramdurg": "ರಾಮದುರ್ಗ",
+  "Savadatti": "ಸಾವದತ್ತಿ",
+  "Hukkeri": "ಹುಕ್ಕೇರಿ",
+  "Khanapur": "ಖಾನಾಪುರ",
+  // Bengaluru Rural
+  "Devanahalli": "ದೇವನಹಳ್ಳಿ",
+  "Doddaballapur": "ದೊಡ್ಡಬಳ್ಳಾಪುರ",
+  "Nelamangala": "ನೆಲಮಂಗಲ",
+  "Hoskote": "ಹೊಸಕೋಟೆ",
+  "Vijayapura": "ವಿಜಯಪುರ",
+  "Magadi": "ಮಾಗಡಿ",
+  // Bengaluru Urban
+  "Bengaluru": "ಬೆಂಗಳೂರು",
+  "Yelahanka": "ಯೆಲಹಂಕ",
+  "KR Puram": "ಕೆ.ಆರ್. ಪುರಂ",
+  "Whitefield": "ವೈಟ್ಫೀಲ್ಡ್",
+  "Jayanagar": "ಜಯನಗರ",
+  "Malleshwaram": "ಮಲ್ಲೇಶ್ವರಂ",
+  "Hebbal": "ಹೆಬ್ಬಾಳ",
+  "Basavanagudi": "ಬಸವನಗುಡಿ",
+  "Banashankari": "ಬನಶಂಕರಿ",
+  "Rajajinagar": "ರಾಜಾಜಿನಗರ",
+  "Vijayanagar": "ವಿಜಯನಗರ",
+  "Marathahalli": "ಮಾರಥಹಳ್ಳಿ",
+  "BTM Layout": "ಬಿ.ಟಿ.ಎಂ. ಲೇಔಟ್",
+  "Indiranagar": "ಇಂದಿರಾನಗರ",
+  // Bidar district
+  "Bidar": "ಬೀದರ್",
+  "Basavakalyan": "ಬಸವಕಲ್ಯಾಣ",
+  "Bhalki": "ಭಲ್ಕಿ",
+  "Humnabad": "ಹುಮನಾಬಾದ",
+  "Aurad": "ಔರದ",
+  "Chitgoppa": "ಚಿತ್‌ಗೋಪ್ಪ",
+  // Chamarajanagar district
+  "Chamarajanagar": "ಚಾಮರಾಜನಗರ",
+  "Gundlupet": "ಗುಂಡಲುಪೇಟೆ",
+  "Kollegal": "ಕೊಳ್ಳೇಗಾಲ",
+  "Yelandur": "ಯಲ್ಲಂದೂರು",
+  "Hanur": "ಹಾನೂರು",
+  // Chikballapur district
+  "Chikballapur": "ಚಿಕ್ಕಬಳ್ಳಾಪುರ",
+  "Chintamani": "ಚಿಂತಾಮಣಿ",
+  "Sidlaghatta": "ಸಿದ್ಲಾಘಟ್ಟ",
+  "Bagepalli": "ಬಾಗೇಪಲ್ಲಿ",
+  "Gudibanda": "ಗುಡಿಬಂಡೆ",
+  "Gauribidanur": "ಗೌರಿಬಿದನೂರು",
+  // Chikkamagaluru district
+  "Chikkamagaluru": "ಚಿಕ್ಕಮಗಳೂರು",
+  "Tarikere": "ತರಿಕೇರೆ",
+  "Kadur": "ಕದೂರು",
+  "Mudigere": "ಮುದಿಗೆರೆ",
+  "Koppa": "ಕೊಪ್ಪ",
+  "Sringeri": "ಶೃಂಗೇರಿ",
+  "Ajjampura": "ಅಜ್ಜಂಪುರ",
+  // Chitradurga district
+  "Chitradurga": "ಚಿತ್ರದುರ್ಗ",
+  "Hosadurga": "ಹೊಸದುರ್ಗ",
+  "Hiriyur": "ಹಿರಿಯೂರು",
+  "Holalkere": "ಹೊಲಲ್ಕೆರೆ",
+  "Molakalmuru": "ಮೊಳಕಾಲ್ಮೂರು",
+  "Challakere": "ಚಳ್ಳಕೆರೆ",
+  // Dakshina Kannada district
+  "Mangaluru": "ಮಂಗಳೂರು",
+  "Puttur": "ಪುತ್ತೂರು",
+  "Bantwal": "ಬಂಟ್ವಾಳ",
+  "Sullia": "ಸುಳ್ಯ",
+  "Belthangady": "ಬೆಳ್ತಂಗಡಿ",
+  "Moodabidri": "ಮೂಡುಬಿದಿರೆ",
+  "Uppinangady": "ಉಪ್ಪಿನಂಗಡಿ",
+  // Davanagere district
+  "Davanagere": "ದಾವಣಗೆರೆ",
+  "Harihar": "ಹರಿಹರ",
+  "Channagiri": "ಚನ್ನಗಿರಿ",
+  "Jagalur": "ಜಗಳೂರು",
+  "Honnali": "ಹೊನ್ನಾಳಿ",
+  "Harapanahalli": "ಹರಪನಹಳ್ಳಿ",
+  // Dharwad district
+  "Dharwad": "ಧಾರವಾಡ",
+  "Hubballi": "ಹುಬ್ಬಳ್ಳಿ",
+  "Navalgund": "ನವಲಗುಂದ",
+  "Kundgol": "ಕುಂದಗೋಲ",
+  "Alnavar": "ಆಳನಾವರು",
+  "Kalghatgi": "ಕಲಗಟ್ಗಿ",
+  // Gadag district
+  "Gadag": "ಗದಗ",
+  "Betageri": "ಬೇತಗೇರಿ",
+  "Mundargi": "ಮುಂಡರಗಿ",
+  "Ron": "ರೋಣ",
+  "Shirhatti": "ಶಿರಹಟ್ಟಿ",
+  "Nargund": "ನಾರಗುಂದ",
+  // Hassan district
+  "Hassan": "ಹಾಸನ",
+  "Arsikere": "ಅರಸೀಕೆರೆ",
+  "Belur": "ಬೇಲೂರು",
+  "Sakleshpur": "ಸಕಲೇಶಪುರ",
+  "Channarayapatna": "ಚನ್ನರಾಯಪಟ್ಟಣ",
+  "Alur": "ಆಲೂರು",
+  "Holenarasipura": "ಹೊಳೆನರಸೀಪುರ",
+  // Haveri district
+  "Haveri": "ಹಾವೇರಿ",
+  "Ranebennur": "ರಾಣೇಬೆನ್ನೂರು",
+  "Byadgi": "ಬ್ಯಾಡಗಿ",
+  "Hirekerur": "ಹಿರೇಕೇರೂರು",
+  "Savanur": "ಸಾವನೂರು",
+  "Shiggaon": "ಶಿಗ್ಗಾಂವ",
+  "Hanagal": "ಹಾನಗಲ್",
+  // Kalaburagi district
+  "Kalaburagi": "ಕಲಬುರಗಿ",
+  "Afzalpur": "ಅಫಜಲ್ಪುರ",
+  "Aland": "ಆಳಂದ",
+  "Chincholi": "ಚಿಂಚೋಳಿ",
+  "Chittapur": "ಚಿತ್ತಾಪುರ",
+  "Jevargi": "ಜೇವರಗಿ",
+  "Sedam": "ಸೇಡಂ",
+  "Shahabad": "ಶಾಹಾಬಾದ",
+  // Kodagu district
+  "Madikeri": "ಮಡಿಕೇರಿ",
+  "Virajpet": "ವಿರಾಜಪೇಟೆ",
+  "Somwarpet": "ಸೋಮವಾರಪೇಟೆ",
+  "Kushalnagar": "ಕುಶಲನಗರ",
+  "Gonikoppal": "ಗೋಣಿಕೊಪ್ಪಲ್",
+  // Kolar district
+  "Kolar": "ಕೋಲಾರ",
+  "Bangarapet": "ಬಂಗಾರಪೇಟೆ",
+  "Malur": "ಮಾಲೂರು",
+  "Mulbagal": "ಮುಳಬಾಗಲು",
+  "Srinivaspur": "ಶ್ರೀನಿವಾಸಪುರ",
+  // Koppal district
+  "Koppal": "ಕೊಪ್ಪಳ",
+  "Gangavathi": "ಗಂಗಾವತಿ",
+  "Kushtagi": "ಕುಷ್ಟಗಿ",
+  "Yelburga": "ಯೆಲಬುರ್ಗ",
+  "Karatagi": "ಕರತಗಿ",
+  // Mandya district
+  "Mandya": "ಮಂಡ್ಯ",
+  "Maddur": "ಮದ್ದೂರು",
+  "Malavalli": "ಮಾಳವಳ್ಳಿ",
+  "Srirangapatna": "ಶ್ರೀರಂಗಪಟ್ಟಣ",
+  "Nagamangala": "ನಾಗಮಂಗಲ",
+  "Pandavapura": "ಪಾಂಡವಪುರ",
+  "Krishnarajpet": "ಕೃಷ್ಣರಾಜಪೇಟೆ",
+  // Mysuru district
+  "Mysuru": "ಮೈಸೂರು",
+  "Nanjangud": "ನಂಜನಗೂಡು",
+  "T. Narasipura": "ಟಿ. ನರಸೀಪುರ",
+  "Hunsur": "ಹುಣಸೂರು",
+  "K.R. Nagar": "ಕೆ.ಆರ್. ನಗರ",
+  "Periyapatna": "ಪೇರಿಯಪಟ್ಟಣ",
+  "H.D. Kote": "ಎಚ್.ಡಿ. ಕೋಟೆ",
+  "Saragur": "ಸಾರಗೂರು",
+  // Raichur district
+  "Raichur": "ರಾಯಚೂರು",
+  "Manvi": "ಮಾನವಿ",
+  "Sindhanur": "ಸಿಂಧನೂರು",
+  "Lingasugur": "ಲಿಂಗಸೂಗೂರು",
+  "Devadurga": "ದೇವದುರ್ಗ",
+  "Maski": "ಮಸ್ಕಿ",
+  // Ramanagara district
+  "Ramanagara": "ರಾಮನಗರ",
+  "Channapatna": "ಚನ್ನಪಟ್ಟಣ",
+  "Kanakapura": "ಕನಕಪುರ",
+  // Shivamogga district
+  "Shivamogga": "ಶಿವಮೊಗ್ಗ",
+  "Bhadravati": "ಭದ್ರಾವತಿ",
+  "Sagar": "ಸಾಗರ",
+  "Tirthahalli": "ತೀರ್ಥಹಳ್ಳಿ",
+  "Shikaripura": "ಶಿಕಾರಿಪುರ",
+  "Hosanagara": "ಹೊಸನಗರ",
+  "Sorab": "ಸೋರಾಬ",
+  // Tumakuru district
+  "Tumkur": "ತುಮಕೂರು",
+  "Sira": "ಸಿರಾ",
+  "Tiptur": "ತಿಪ್ತೂರು",
+  "Gubbi": "ಗುಬ್ಬಿ",
+  "Koratagere": "ಕೋರಟಗೆರೆ",
+  "Kunigal": "ಕುಣಿಗಲ್",
+  "Pavagada": "ಪಾವಗಡ",
+  "Madhugiri": "ಮಧುಗಿರಿ",
+  "Chikkanayakanahalli": "ಚಿಕ್ಕನಾಯಕನಹಳ್ಳಿ",
+  // Udupi district
+  "Udupi": "ಉಡುಪಿ",
+  "Kundapura": "ಕುಂದಾಪುರ",
+  "Karkala": "ಕಾರ್ಕಳ",
+  "Brahmavar": "ಬ್ರಹ್ಮಾವರ",
+  "Kapu": "ಕಾಪು",
+  "Hebri": "ಹೆಬ್ರಿ",
+  // Uttara Kannada district
+  "Karwar": "ಕಾರವಾರ",
+  "Sirsi": "ಸಿರಸಿ",
+  "Dandeli": "ದಾಂಡೇಲಿ",
+  "Bhatkal": "ಭಟ್ಕಳ",
+  "Kumta": "ಕುಂಟಾ",
+  "Ankola": "ಅಂಕೋಲ",
+  "Honnavar": "ಹೊನ್ನಾವರು",
+  "Joida": "ಜೋಯಿಡ",
+  "Yellapur": "ಯೆಲ್ಲಾಪುರ",
+  "Mundgod": "ಮುಂಡಗೋಡ",
+  "Siddapur": "ಸಿದ್ದಾಪುರ",
+  "Haliyal": "ಹಾಲಿಯಾಳ",
+  // Vijayapura district
+  "Basavana Bagewadi": "ಬಸವನ ಬಾಗೇವಾಡಿ",
+  "Indi": "ಇಂದಿ",
+  "Sindgi": "ಸಿಂದಗಿ",
+  "Muddebihal": "ಮುದ್ದೇಬಿಹಾಳ",
+  "Devar Hippargi": "ದೇವರ ಹಿಪ್ಪರಗಿ",
+  // Yadgir district
+  "Yadgir": "ಯಾದಗಿರಿ",
+  "Shahapur": "ಶಾಹಾಪುರ",
+  "Surpur": "ಸೂರಪುರ",
+  "Gurmitkal": "ಗುರ್ಮಿಟ್ಕಲ್",
+  "Hunsagi": "ಹುಣಸಗಿ",
+  // Common
+  "Other (type your own)": "ಇತರೆ (ನಿಮ್ಮದೇ ಆದದನ್ನು ಟೈಪ್ ಮಾಡಿ)"
 };
 
 const COLORS = ["#34d399", "#fbbf24", "#60a5fa", "#f87171", "#a78bfa", "#f472b6", "#38bdf8", "#facc15", "#4ade80", "#f472b6"];
@@ -92,6 +336,28 @@ const FERT_PEST_RECOMMENDATIONS: Record<string, { fertilizers: string[]; pestici
 };
 
 const CombinedInsightsPage: React.FC = () => {
+  const { language, translate } = useLanguage();
+  
+  // Voice interaction hook
+  const {
+    speak,
+    stopSpeaking,
+    isSpeaking,
+    ttsSupported,
+    startListening,
+    stopListening,
+    isListening,
+    transcript,
+    sttSupported,
+    sttError
+  } = useVoiceInteraction({
+    language: language as 'en' | 'kn',
+    onTranscript: (text) => {
+      // Handle voice input - could be used for custom crop/city input
+      console.log('Voice transcript:', text);
+    }
+  });
+  
   const [selectedDistrict, setSelectedDistrict] = useState<string>(KARNATAKA_DISTRICTS[0]);
   const [city, setCity] = useState<string>(DISTRICT_CITIES[KARNATAKA_DISTRICTS[0]] ? DISTRICT_CITIES[KARNATAKA_DISTRICTS[0]][0] : KARNATAKA_DISTRICTS[0]);
   const [customCity, setCustomCity] = useState<string>("");
@@ -148,7 +414,7 @@ const CombinedInsightsPage: React.FC = () => {
     // Fetch weather and crop insights in parallel
     const [weatherResult, cropResult] = await Promise.all([
       fetchWeather(cityValue),
-      getCropInsights(selectedDistrict, selectedMonth)
+      getCropInsights(selectedDistrict, selectedMonth, language)
     ]);
     if ('error' in weatherResult) {
       setError(weatherResult.error);
@@ -172,7 +438,7 @@ const CombinedInsightsPage: React.FC = () => {
       description: weatherResult.description,
       rain_last_hour_mm: weatherResult.rain || 0,
     });
-    const aiAdviceResult = await getWeatherBasedAdvice(weatherJson, `${cropContext} Current city: ${weatherResult.city}${cropValue ? ", User is interested in: " + cropValue : ""}`);
+    const aiAdviceResult = await getWeatherBasedAdvice(weatherJson, `${cropContext} Current city: ${weatherResult.city}${cropValue ? ", User is interested in: " + cropValue : ""}`, language);
     setAIAdvice(aiAdviceResult);
     // AI-powered fertilizer/pesticide quantities
     if (cropValue && acres && !isNaN(parseFloat(acres)) && parseFloat(acres) > 0) {
@@ -182,7 +448,8 @@ const CombinedInsightsPage: React.FC = () => {
         selectedDistrict,
         selectedMonth,
         weatherResult,
-        parseFloat(acres)
+        parseFloat(acres),
+        language
       );
       setAiFertPestQuantities(fertPestResult);
       setAiFertPestLoading(false);
@@ -378,15 +645,17 @@ const CombinedInsightsPage: React.FC = () => {
         )}
         {/* Main insights content to capture for PDF */}
         <div ref={insightRef}>
-          <h2 className="text-4xl font-extrabold text-green-700 mb-6 text-center tracking-tight animate-fade-in">🌾 Combined Crop & Weather Insights</h2>
+          <h2 className="text-4xl font-extrabold text-green-700 mb-6 text-center tracking-tight animate-fade-in">
+            🌾 {translate('combinedCropWeatherTitle')}
+          </h2>
           <p className="text-lg text-gray-700 mb-8 text-center max-w-2xl mx-auto animate-fade-in">
-            Get AI-powered crop recommendations that are <span className="font-bold text-green-600">personalized for real-time weather</span> in your district!
+            {translate('getAIPoweredRec')} <span className="font-bold text-green-600">{translate('personalizedRealTime')}</span> {translate('inYourDistrict')}
           </p>
           {error && <Alert type="error" message={error} onClose={() => setError(null)} />}
           <Card className="mb-8 bg-gradient-to-br from-green-100 via-lime-100 to-yellow-50 border-2 border-green-300 animate-fade-in">
             <div className="grid md:grid-cols-5 gap-6 mb-6 items-end">
               <div>
-                <label htmlFor="district-select" className="block text-sm font-medium text-gray-700 mb-1">District</label>
+                <label htmlFor="district-select" className="block text-sm font-medium text-gray-700 mb-1">{translate('district')}</label>
                 <select
                   id="district-select"
                   value={selectedDistrict}
@@ -394,12 +663,14 @@ const CombinedInsightsPage: React.FC = () => {
                   className="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500"
                 >
                   {KARNATAKA_DISTRICTS.map(district => (
-                    <option key={district} value={district}>{district}</option>
+                    <option key={district} value={district}>
+                      {language === 'kn' ? DISTRICT_NAMES_KANNADA[district] || district : district}
+                    </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label htmlFor="city-select" className="block text-sm font-medium text-gray-700 mb-1">City/Town</label>
+                <label htmlFor="city-select" className="block text-sm font-medium text-gray-700 mb-1">{translate('cityTown')}</label>
                 <select
                   id="city-select"
                   value={city}
@@ -407,7 +678,9 @@ const CombinedInsightsPage: React.FC = () => {
                   className="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500"
                 >
                   {(DISTRICT_CITIES[selectedDistrict] || [selectedDistrict]).map(cityOption => (
-                    <option key={cityOption} value={cityOption}>{cityOption}</option>
+                    <option key={cityOption} value={cityOption}>
+                      {language === 'kn' ? CITY_NAMES_KANNADA[cityOption] || cityOption : cityOption}
+                    </option>
                   ))}
                 </select>
                 {city === "Other (type your own)" && (
@@ -421,7 +694,7 @@ const CombinedInsightsPage: React.FC = () => {
                 )}
               </div>
               <div>
-                <label htmlFor="month-select" className="block text-sm font-medium text-gray-700 mb-1">Month</label>
+                <label htmlFor="month-select" className="block text-sm font-medium text-gray-700 mb-1">{translate('month')}</label>
                 <select
                   id="month-select"
                   value={selectedMonth}
@@ -429,23 +702,29 @@ const CombinedInsightsPage: React.FC = () => {
                   className="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500"
                 >
                   {MONTHS.map(month => (
-                    <option key={month} value={month}>{month}</option>
+                    <option key={month} value={month}>
+                      {language === 'kn' ? MONTH_NAMES_KANNADA[month] || month : month}
+                    </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label htmlFor="crop-select" className="block text-sm font-medium text-gray-700 mb-1">Crop (optional)</label>
+                <label htmlFor="crop-select" className="block text-sm font-medium text-gray-700 mb-1">{translate('cropOptional')}</label>
                 <select
                   id="crop-select"
                   value={selectedCrop}
                   onChange={e => setSelectedCrop(e.target.value)}
                   className="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500"
                 >
-                  <option value="">-- Select Crop --</option>
+                  <option value="">{translate('selectCrop')}</option>
                   {COMMON_CROPS.map(crop => (
-                    <option key={crop} value={crop}>{crop}</option>
+                    <option key={crop} value={crop}>
+                      {language === 'kn' ? CROP_NAMES_KANNADA[crop] || crop : crop}
+                    </option>
                   ))}
-                  <option value="Other (type your own)">Other (type your own)</option>
+                  <option value="Other (type your own)">
+                    {language === 'kn' ? 'ಇತರೆ (ನಿಮ್ಮದೇ ಆದದನ್ನು ಟೈಪ್ ಮಾಡಿ)' : 'Other (type your own)'}
+                  </option>
                 </select>
                 {selectedCrop === "Other (type your own)" && (
                   <input
@@ -458,7 +737,7 @@ const CombinedInsightsPage: React.FC = () => {
                 )}
               </div>
               <div>
-                <label htmlFor="acres-input" className="block text-sm font-medium text-gray-700 mb-1">Acres</label>
+                <label htmlFor="acres-input" className="block text-sm font-medium text-gray-700 mb-1">{translate('acres')}</label>
                 <input
                   id="acres-input"
                   type="number"
@@ -475,9 +754,25 @@ const CombinedInsightsPage: React.FC = () => {
                 disabled={isLoading || !selectedDistrict || !selectedMonth || !getCityValue()}
                 className="w-full md:w-auto px-6 py-3 bg-gradient-to-r from-green-500 via-lime-400 to-yellow-400 text-white font-semibold rounded-md shadow-md hover:scale-105 transition-all duration-300 disabled:opacity-50"
               >
-                {isLoading ? <LoadingSpinner size="sm" /> : 'Get Combined Insights'}
+                {isLoading ? <LoadingSpinner size="sm" /> : translate('getCombinedInsights')}
               </button>
             </div>
+            
+            {/* Voice transcript display */}
+            {transcript && (
+              <div className="mt-4 p-4 bg-blue-50 border-2 border-blue-300 rounded-lg">
+                <p className="text-sm font-semibold text-blue-700 mb-1">
+                  {language === 'kn' ? 'ಧ್ವನಿ ಇನ್‌ಪುಟ್:' : 'Voice Input:'}
+                </p>
+                <p className="text-gray-800">{transcript}</p>
+              </div>
+            )}
+            
+            {sttError && (
+              <div className="mt-2 text-sm text-red-600">
+                {language === 'kn' ? 'ಧ್ವನಿ ದೋಷ:' : 'Voice Error:'} {sttError}
+              </div>
+            )}
           </Card>
           {isLoading && <LoadingSpinner text="Fetching crop & weather insights..." />}
           {/* Weather Section as stat cards only */}
@@ -683,6 +978,26 @@ const CombinedInsightsPage: React.FC = () => {
                 <Card className="mb-8 bg-gradient-to-br from-yellow-100 via-orange-100 to-pink-50 border-2 border-yellow-400 animate-fade-in shadow-2xl relative overflow-hidden">
                   {/* Subtle animated background pattern */}
                   <div className="absolute inset-0 opacity-10 pointer-events-none animate-pulse" style={{background: 'radial-gradient(circle at 30% 30%, #fbbf24 0%, transparent 70%), radial-gradient(circle at 70% 70%, #f472b6 0%, transparent 70%)'}}></div>
+                  
+                  {/* Voice Controls */}
+                  <div className="flex justify-end mb-4 z-20 relative">
+                    <VoiceControls
+                      onSpeak={() => speak(adviceText)}
+                      onStopSpeaking={stopSpeaking}
+                      isSpeaking={isSpeaking}
+                      ttsSupported={ttsSupported}
+                      ttsTooltip={language === 'kn' ? 'ಜೋರಾಗಿ ಓದಿ' : 'Read aloud'}
+                      onStartListening={startListening}
+                      onStopListening={stopListening}
+                      isListening={isListening}
+                      sttSupported={sttSupported}
+                      sttTooltip={language === 'kn' ? 'ಧ್ವನಿ ಇನ್‌ಪುಟ್' : 'Voice input'}
+                      showTTS={true}
+                      showSTT={false}
+                      compact={false}
+                    />
+                  </div>
+                  
                   {/* Status and summary */}
                   <div className={`flex flex-col items-center justify-center gap-2 mb-6 mt-2 px-6 py-3 rounded-xl shadow-lg text-xl font-bold ${statusColor} animate-glow z-10 relative`}>
                     <div>{statusIcon} {status}</div>
