@@ -106,44 +106,49 @@ export const useVoiceInteraction = ({
     // Cancel any ongoing speech
     synthRef.current.cancel();
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = language === 'kn' ? 'kn-IN' : 'en-US';
-    utterance.rate = 0.9;
-    utterance.pitch = 1;
-    utterance.volume = 1;
+    // Small delay to prevent errors
+    setTimeout(() => {
+      if (!synthRef.current) return;
+      
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = language === 'kn' ? 'kn-IN' : 'en-US';
+      utterance.rate = 0.9;
+      utterance.pitch = 1;
+      utterance.volume = 1;
 
-    utterance.onstart = () => {
-      setIsSpeaking(true);
-    };
+      utterance.onstart = () => {
+        setIsSpeaking(true);
+      };
 
-    utterance.onend = () => {
-      setIsSpeaking(false);
-    };
+      utterance.onend = () => {
+        setIsSpeaking(false);
+      };
 
-    utterance.onerror = (event) => {
-      console.error('Speech synthesis error:', event);
-      setIsSpeaking(false);
-    };
+      utterance.onerror = () => {
+        // Silently handle errors to avoid console spam
+        setIsSpeaking(false);
+      };
 
-    // Get available voices and try to find a Kannada voice if needed
-    const voices = synthRef.current.getVoices();
-    if (language === 'kn') {
-      const kannadaVoice = voices.find(voice => 
-        voice.lang.startsWith('kn') || voice.lang.includes('Kannada')
-      );
-      if (kannadaVoice) {
-        utterance.voice = kannadaVoice;
+      // Get available voices and try to find a Kannada voice if needed
+      const voices = synthRef.current.getVoices();
+      if (language === 'kn') {
+        const kannadaVoice = voices.find(voice => 
+          voice.lang.startsWith('kn') || voice.lang.includes('Kannada')
+        );
+        if (kannadaVoice) {
+          utterance.voice = kannadaVoice;
+        }
+      } else {
+        const englishVoice = voices.find(voice => 
+          voice.lang.startsWith('en')
+        );
+        if (englishVoice) {
+          utterance.voice = englishVoice;
+        }
       }
-    } else {
-      const englishVoice = voices.find(voice => 
-        voice.lang.startsWith('en')
-      );
-      if (englishVoice) {
-        utterance.voice = englishVoice;
-      }
-    }
 
-    synthRef.current.speak(utterance);
+      synthRef.current.speak(utterance);
+    }, 100);
   }, [language]);
 
   const stopSpeaking = useCallback(() => {

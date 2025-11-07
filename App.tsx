@@ -13,7 +13,7 @@ import CropInsightsPage from './pages/CropInsightsPage.tsx';
 import ScanHistoryPage from './pages/ScanHistoryPage.tsx';
 import CommunityHubPage from './pages/CommunityHubPage.tsx';
 import FarmerConnectPage from './pages/FarmerConnectPage.tsx';
-import ARPlantScanPage from './pages/ARPlantScanPage_NEW.tsx'; // World-Class AR Disease Detection with AI
+import ARPlantScanPage from './pages/ARPlantScanPage_REALTIME_STUNNING.tsx'; // Stunning Real-Time AR Disease Detection
 
 const App: React.FC = () => {
   return (
