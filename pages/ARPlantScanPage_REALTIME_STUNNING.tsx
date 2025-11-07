@@ -55,6 +55,12 @@ const ARPlantScanPage_REALTIME_STUNNING: React.FC = () => {
   const [analysis, setAnalysis] = useState<DiseaseAnalysis | null>(null);
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  
+  // Chat help states
+  const [showChatHelp, setShowChatHelp] = useState(false);
+  const [userQuestion, setUserQuestion] = useState('');
+  const [chatResponse, setChatResponse] = useState('');
+  const [isLoadingChat, setIsLoadingChat] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -96,7 +102,17 @@ const ARPlantScanPage_REALTIME_STUNNING: React.FC = () => {
       mild: 'Mild',
       moderate: 'Moderate',
       severe: 'Severe',
-      critical: 'Critical'
+      critical: 'Critical',
+      chatHelp: 'Ask AI Assistant',
+      askQuestion: 'Ask a question about this diagnosis...',
+      sendQuestion: 'Send',
+      speakAnswer: 'Speak Answer',
+      stopSpeaking: 'Stop Speaking',
+      exampleQuestions: 'Example Questions',
+      example1: 'How do I prevent this disease?',
+      example2: 'What are the best organic treatments?',
+      example3: 'How long will recovery take?',
+      example4: 'Can this spread to other plants?'
     },
     kn: {
       title: 'ಎಆರ್ ಸಸ್ಯ ರೋಗ ಪತ್ತೆ',
@@ -131,11 +147,21 @@ const ARPlantScanPage_REALTIME_STUNNING: React.FC = () => {
       mild: 'ಸೌಮ್ಯ',
       moderate: 'ಮಧ್ಯಮ',
       severe: 'ತೀವ್ರ',
-      critical: 'ನಿರ್ಣಾಯಕ'
+      critical: 'ನಿರ್ಣಾಯಕ',
+      chatHelp: 'ಎಐ ಸಹಾಯಕನನ್ನು ಕೇಳಿ',
+      askQuestion: 'ಈ ರೋಗನಿರ್ಣಯದ ಬಗ್ಗೆ ಪ್ರಶ್ನೆ ಕೇಳಿ...',
+      sendQuestion: 'ಕಳುಹಿಸಿ',
+      speakAnswer: 'ಉತ್ತರ ಮಾತನಾಡಿ',
+      stopSpeaking: 'ಮಾತನಾಡುವುದನ್ನು ನಿಲ್ಲಿಸಿ',
+      exampleQuestions: 'ಉದಾಹರಣೆ ಪ್ರಶ್ನೆಗಳು',
+      example1: 'ನಾನು ಈ ರೋಗವನ್ನು ಹೇಗೆ ತಡೆಯಬಹುದು?',
+      example2: 'ಉತ್ತಮ ಸಾವಯವ ಚಿಕಿತ್ಸೆಗಳು ಯಾವುವು?',
+      example3: 'ಚೇತರಿಕೆಗೆ ಎಷ್ಟು ಸಮಯ ತೆಗೆದುಕೊಳ್ಳುತ್ತದೆ?',
+      example4: 'ಇದು ಇತರ ಸಸ್ಯಗಳಿಗೆ ಹರಡಬಹುದೇ?'
     }
   };
 
-  const t = translations[language];
+  const t = translations[language as 'en' | 'kn'] || translations.en;
 
   // Online status monitor
   useEffect(() => {
@@ -694,6 +720,55 @@ ${analysis.treatment.slice(0, 3).map(t => `• ${t}`).join('\n')}
     }
   };
 
+  // Handle chat question
+  const handleChatQuestion = async (question: string) => {
+    if (!question.trim() || !analysis) return;
+    
+    setIsLoadingChat(true);
+    setChatResponse('');
+    
+    try {
+      // Create context from analysis
+      const context = `
+Disease: ${analysis.diseaseName}
+Plant: ${analysis.plantType}
+Severity: ${analysis.severity}
+Symptoms: ${analysis.symptoms.join(', ')}
+Treatment: ${analysis.treatment.join(', ')}
+Prevention: ${analysis.prevention.join(', ')}
+Recovery Time: ${analysis.estimatedRecoveryTime}
+Spread Risk: ${analysis.spreadRisk}
+`;
+
+      const prompt = `Based on this plant disease analysis:
+${context}
+
+Answer this question in ${language === 'kn' ? 'Kannada' : 'English'}: ${question}
+
+Provide a helpful, practical answer in 2-3 sentences.`;
+
+      const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=AIzaSyBM8vn7Of-eUQ83qEeXuM84YPkW53NkQGU', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }]
+        })
+      });
+
+      const data = await response.json();
+      const answer = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Unable to generate answer.';
+      
+      setChatResponse(answer);
+    } catch (error) {
+      console.error('Chat error:', error);
+      setChatResponse(language === 'kn' 
+        ? 'ಉತ್ತರವನ್ನು ರಚಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.' 
+        : 'Unable to generate answer. Please try again.');
+    } finally {
+      setIsLoadingChat(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 py-4 px-4">
       <div className="max-w-6xl mx-auto">
@@ -1108,6 +1183,105 @@ ${analysis.treatment.slice(0, 3).map(t => `• ${t}`).join('\n')}
                     <p className="font-bold text-lg">{analysis.spreadRisk}</p>
                   </div>
                 </div>
+              </div>
+            </Card>
+
+            {/* AI Chat Help Section */}
+            <Card className="bg-gradient-to-br from-blue-50 to-indigo-50">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-2xl font-bold text-blue-800 flex items-center gap-2">
+                    🤖 {t.chatHelp}
+                  </h3>
+                  <button
+                    onClick={() => setShowChatHelp(!showChatHelp)}
+                    className="text-blue-600 hover:text-blue-800 font-semibold text-sm"
+                  >
+                    {showChatHelp ? '▼' : '▶'} {showChatHelp ? (language === 'kn' ? 'ಮುಚ್ಚಿ' : 'Close') : (language === 'kn' ? 'ತೆರೆಯಿರಿ' : 'Open')}
+                  </button>
+                </div>
+
+                {showChatHelp && (
+                  <div className="space-y-4">
+                    {/* Example Questions */}
+                    <div className="bg-white rounded-lg p-4 shadow-inner">
+                      <p className="text-sm font-semibold text-gray-700 mb-3">💡 {t.exampleQuestions}:</p>
+                      <div className="space-y-2">
+                        {[t.example1, t.example2, t.example3, t.example4].map((example, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => {
+                              setUserQuestion(example);
+                              handleChatQuestion(example);
+                            }}
+                            className="w-full text-left p-3 bg-blue-50 hover:bg-blue-100 rounded-lg text-sm text-blue-800 transition-all"
+                          >
+                            {example}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Question Input */}
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={userQuestion}
+                        onChange={(e) => setUserQuestion(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleChatQuestion(userQuestion)}
+                        placeholder={t.askQuestion}
+                        className="flex-1 px-4 py-3 border-2 border-blue-300 rounded-xl focus:outline-none focus:border-blue-500 text-base"
+                      />
+                      <button
+                        onClick={() => handleChatQuestion(userQuestion)}
+                        disabled={!userQuestion.trim() || isLoadingChat}
+                        className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-xl font-bold hover:from-blue-600 hover:to-indigo-700 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isLoadingChat ? '⏳' : '📤'} {t.sendQuestion}
+                      </button>
+                    </div>
+
+                    {/* Chat Response */}
+                    {chatResponse && (
+                      <div className="bg-white rounded-lg p-4 shadow-md border-2 border-blue-200">
+                        <div className="flex items-start gap-3 mb-3">
+                          <div className="text-3xl">🤖</div>
+                          <div className="flex-1">
+                            <p className="text-gray-800 leading-relaxed">{chatResponse}</p>
+                          </div>
+                        </div>
+                        
+                        {/* TTS Controls for Answer */}
+                        <div className="flex gap-2 mt-4">
+                          <button
+                            onClick={() => speak(chatResponse)}
+                            disabled={isSpeaking}
+                            className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 px-4 rounded-xl font-bold hover:from-green-600 hover:to-emerald-700 transition-all shadow-lg disabled:opacity-50"
+                          >
+                            🔊 {t.speakAnswer}
+                          </button>
+                          {isSpeaking && (
+                            <button
+                              onClick={stopSpeaking}
+                              className="flex-1 bg-gradient-to-r from-red-500 to-red-600 text-white py-3 px-4 rounded-xl font-bold hover:from-red-600 hover:to-red-700 transition-all shadow-lg"
+                            >
+                              ⏸️ {t.stopSpeaking}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {isLoadingChat && (
+                      <div className="flex items-center justify-center p-6">
+                        <LoadingSpinner />
+                        <span className="ml-3 text-blue-600 font-semibold">
+                          {language === 'kn' ? 'ಉತ್ತರವನ್ನು ರಚಿಸಲಾಗುತ್ತಿದೆ...' : 'Generating answer...'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </Card>
           </div>
