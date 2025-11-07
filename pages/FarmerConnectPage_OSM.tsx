@@ -13,30 +13,33 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Custom farmer icon
+// Custom farmer icon - using URL encoding instead of btoa to support emojis
 const farmerIcon = L.icon({
-  iconUrl: 'data:image/svg+xml;base64,' + btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
-      <circle cx="20" cy="20" r="18" fill="#22c55e" stroke="#fff" stroke-width="3"/>
-      <text x="20" y="28" font-size="20" text-anchor="middle" fill="#fff">🌾</text>
+  iconUrl: 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50">
+      <circle cx="25" cy="25" r="22" fill="#22c55e" stroke="#fff" stroke-width="4"/>
+      <circle cx="25" cy="25" r="18" fill="#16a34a"/>
+      <path d="M 25 10 L 28 20 L 38 20 L 30 26 L 33 36 L 25 30 L 17 36 L 20 26 L 12 20 L 22 20 Z" fill="#fbbf24" stroke="#fff" stroke-width="1"/>
     </svg>
   `),
-  iconSize: [40, 40],
-  iconAnchor: [20, 40],
-  popupAnchor: [0, -40]
+  iconSize: [50, 50],
+  iconAnchor: [25, 50],
+  popupAnchor: [0, -50]
 });
 
-// Custom user location icon
+// Custom user location icon - using URL encoding
 const userIcon = L.icon({
-  iconUrl: 'data:image/svg+xml;base64,' + btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
-      <circle cx="20" cy="20" r="18" fill="#3b82f6" stroke="#fff" stroke-width="3"/>
-      <text x="20" y="28" font-size="20" text-anchor="middle" fill="#fff">📍</text>
+  iconUrl: 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50">
+      <circle cx="25" cy="25" r="22" fill="#3b82f6" stroke="#fff" stroke-width="4"/>
+      <circle cx="25" cy="25" r="18" fill="#2563eb"/>
+      <circle cx="25" cy="25" r="8" fill="#fff"/>
+      <circle cx="25" cy="25" r="4" fill="#3b82f6"/>
     </svg>
   `),
-  iconSize: [40, 40],
-  iconAnchor: [20, 40],
-  popupAnchor: [0, -40]
+  iconSize: [50, 50],
+  iconAnchor: [25, 50],
+  popupAnchor: [0, -50]
 });
 
 interface FarmerLocation {
