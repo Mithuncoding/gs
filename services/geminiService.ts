@@ -328,3 +328,62 @@ export const analyzeImage = async (imageBase64: string, prompt: string, language
     throw error;
   }
 };
+
+// Comprehensive plant disease analysis for AR detection
+export const analyzePlantDiseaseWithImage = async (imageBase64: string, language: string = 'en'): Promise<string> => {
+  if (!API_KEY) return "API Key not configured.";
+  
+  const languageInstruction = language === 'kn' 
+    ? '\n\nIMPORTANT: Respond to ALL text fields in KANNADA language (ಕನ್ನಡ). Use Kannada script for all responses except JSON keys.'
+    : '\n\nRespond to all text fields in English.';
+  
+  const prompt = `You are an expert plant pathologist and agricultural scientist. Analyze this plant/leaf image in extreme detail and provide a comprehensive disease diagnosis.
+
+Respond ONLY in valid JSON format with these exact keys:
+{
+  "diseaseName": "Specific disease name or 'Healthy Plant' if no disease detected",
+  "confidence": 85,
+  "severity": "one of: healthy, mild, moderate, severe, critical",
+  "plantType": "Identified plant species or type",
+  "affectedArea": "Which parts are affected (leaves, stems, roots, etc.)",
+  "symptoms": ["List of visible symptoms"],
+  "causes": ["Possible causes of the condition"],
+  "treatment": ["Step-by-step treatment recommendations"],
+  "prevention": ["Preventive measures for future"],
+  "organicSolutions": ["Natural/organic treatment options"],
+  "chemicalSolutions": ["Chemical treatment options if needed"],
+  "estimatedRecoveryTime": "Time estimate for recovery",
+  "spreadRisk": "Risk of spreading to other plants",
+  "urgencyLevel": "How urgently action is needed"
+}
+
+Be extremely detailed and specific. If the plant appears healthy, still provide care recommendations.${languageInstruction}`;
+  
+  try {
+    const base64Data = imageBase64.includes(',') ? imageBase64.split(',')[1] : imageBase64;
+    const mimeType = imageBase64.includes('data:image/jpeg') ? 'image/jpeg' : 'image/png';
+    
+    const imagePart: ImagePart = {
+      inlineData: {
+        data: base64Data,
+        mimeType: mimeType
+      }
+    };
+    
+    const response: GenerateContentResponse = await ai.models.generateContent({
+      model: GEMINI_VISION_MODEL,
+      contents: [
+        {
+          role: 'user',
+          parts: [{ text: prompt }, imagePart]
+        }
+      ]
+    });
+    
+    const text = (response as any).text || (response as any).candidates?.[0]?.content?.parts?.[0]?.text || '';
+    return text || "No response from AI";
+  } catch (error) {
+    console.error("Error analyzing plant disease:", error);
+    throw error;
+  }
+};
