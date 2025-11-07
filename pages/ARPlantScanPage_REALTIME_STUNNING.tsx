@@ -151,7 +151,7 @@ const ARPlantScanPage_REALTIME_STUNNING: React.FC = () => {
     };
   }, []);
 
-  // Advanced leaf detection algorithm - MORE SENSITIVE
+  // Advanced leaf detection algorithm - ULTRA SENSITIVE
   const detectLeaves = useCallback((canvas: HTMLCanvasElement, video: HTMLVideoElement) => {
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx || !video.videoWidth || !video.videoHeight) return [];
@@ -165,11 +165,10 @@ const ARPlantScanPage_REALTIME_STUNNING: React.FC = () => {
     
     const regions: { x: number; y: number; width: number; height: number; pixels: number; avgR: number; avgG: number; avgB: number }[] = [];
     const visited = new Set<string>();
-    const threshold = 15; // REDUCED threshold for better detection
 
-    // Find green regions using flood fill - MORE SENSITIVE
-    for (let y = 0; y < canvas.height; y += 8) { // Smaller step for better coverage
-      for (let x = 0; x < canvas.width; x += 8) {
+    // ULTRA SENSITIVE - Find ANY green/yellow regions
+    for (let y = 0; y < canvas.height; y += 5) { // Even smaller steps
+      for (let x = 0; x < canvas.width; x += 5) {
         const key = `${x},${y}`;
         if (visited.has(key)) continue;
 
@@ -178,14 +177,15 @@ const ARPlantScanPage_REALTIME_STUNNING: React.FC = () => {
         const g = data[i + 1];
         const b = data[i + 2];
 
-        // MUCH MORE SENSITIVE green detection - detects dark green leaves too
-        const isGreenish = (g > r + threshold && g > b + 5) || // Standard green
-                          (g > 40 && g > r && g > b) || // Dark green
-                          (g > 50 && r < 150 && b < 150); // Any greenish color
+        // DETECT ALMOST ANY PLANT COLOR - green, yellow-green, olive
+        const isPlant = (g > r - 10 && g > b - 10 && g > 30) || // Any greenish
+                       (g > 40 && r > 40 && b < 100) || // Yellow-green
+                       (g > r && g > 35) || // Dark green
+                       (r > 50 && g > 50 && b < 80 && g > b); // Olive/brown-green
         
-        if (isGreenish) {
+        if (isPlant) {
           const region = floodFillRegion(x, y, data, canvas.width, canvas.height, visited);
-          if (region.pixels > 2000) { // REDUCED minimum leaf size
+          if (region.pixels > 1000) { // VERY LOW minimum
             regions.push(region);
           }
         }
@@ -199,17 +199,17 @@ const ARPlantScanPage_REALTIME_STUNNING: React.FC = () => {
       let healthStatus: 'healthy' | 'moderate' | 'diseased';
       let color: string;
       
-      // Health determination logic
-      if (avgG > avgR + 20 && avgG > avgB + 15) {
-        // Bright green = healthy
+      // Health determination logic - more forgiving
+      if (avgG > avgR + 10 && avgG > avgB + 10) {
+        // Green = healthy
         healthStatus = 'healthy';
         color = '#10B981'; // Green
-      } else if (avgR > avgG - 15 || avgB > avgG - 15) {
-        // Brownish/yellowish = diseased
+      } else if (avgR > 100 && avgG > 100 && avgB < 100) {
+        // Yellow/brown = diseased
         healthStatus = 'diseased';
         color = '#EF4444'; // Red
       } else {
-        // In between = moderate
+        // Anything else = moderate
         healthStatus = 'moderate';
         color = '#F59E0B'; // Yellow/Orange
       }
@@ -227,7 +227,7 @@ const ARPlantScanPage_REALTIME_STUNNING: React.FC = () => {
     });
   }, [language]);
 
-  // Flood fill helper - MORE SENSITIVE
+  // Flood fill helper - ULTRA SENSITIVE
   const floodFillRegion = (
     startX: number,
     startY: number,
@@ -240,9 +240,8 @@ const ARPlantScanPage_REALTIME_STUNNING: React.FC = () => {
     let pixels = 0;
     let sumR = 0, sumG = 0, sumB = 0;
     const queue = [[startX, startY]];
-    const threshold = 15; // REDUCED for better detection
 
-    while (queue.length > 0 && pixels < 50000) { // Limit to prevent slowdown
+    while (queue.length > 0 && pixels < 50000) {
       const [x, y] = queue.pop()!;
       const key = `${x},${y}`;
       
@@ -253,12 +252,13 @@ const ARPlantScanPage_REALTIME_STUNNING: React.FC = () => {
       const g = data[i + 1];
       const b = data[i + 2];
 
-      // MORE SENSITIVE green detection
-      const isGreenish = (g > r + threshold && g > b + 5) || 
-                        (g > 40 && g > r && g > b) || 
-                        (g > 50 && r < 150 && b < 150);
+      // ULTRA SENSITIVE - detect any plant color
+      const isPlant = (g > r - 10 && g > b - 10 && g > 30) ||
+                     (g > 40 && r > 40 && b < 100) ||
+                     (g > r && g > 35) ||
+                     (r > 50 && g > 50 && b < 80 && g > b);
       
-      if (!isGreenish) continue;
+      if (!isPlant) continue;
 
       visited.add(key);
       pixels++;
@@ -271,9 +271,9 @@ const ARPlantScanPage_REALTIME_STUNNING: React.FC = () => {
       minY = Math.min(minY, y);
       maxY = Math.max(maxY, y);
 
-      // Add neighbors (every 4 pixels to speed up while maintaining accuracy)
-      if (pixels % 4 === 0) {
-        queue.push([x + 4, y], [x - 4, y], [x, y + 4], [x, y - 4]);
+      // Add neighbors - very frequent for accuracy
+      if (pixels % 3 === 0) {
+        queue.push([x + 3, y], [x - 3, y], [x, y + 3], [x, y - 3]);
       }
     }
 
@@ -702,7 +702,7 @@ ${analysis.treatment.slice(0, 3).map(t => `• ${t}`).join('\n')}
                   
                   return (
                     <g key={idx}>
-                      {/* THICK colored box - 8px stroke for mobile visibility */}
+                      {/* ULTRA THICK colored box - 12px stroke with GLOW */}
                       <rect
                         x={paddedX}
                         y={paddedY}
@@ -710,47 +710,51 @@ ${analysis.treatment.slice(0, 3).map(t => `• ${t}`).join('\n')}
                         height={paddedHeight}
                         fill="none"
                         stroke={leaf.color}
-                        strokeWidth="8"
-                        rx="12"
+                        strokeWidth="12"
+                        rx="16"
                         className="animate-pulse"
-                        style={{ filter: 'drop-shadow(0 0 6px rgba(0,0,0,0.5))' }}
+                        style={{ filter: `drop-shadow(0 0 10px ${leaf.color}) drop-shadow(0 0 20px ${leaf.color})` }}
                       />
                       
-                      {/* Corner markers - thicker */}
+                      {/* Corner markers - EXTRA THICK */}
                       <line x1={paddedX} y1={paddedY} 
-                            x2={paddedX + 30} y2={paddedY} 
-                            stroke={leaf.color} strokeWidth="10" strokeLinecap="round" />
+                            x2={paddedX + 40} y2={paddedY} 
+                            stroke={leaf.color} strokeWidth="14" strokeLinecap="round" 
+                            style={{ filter: `drop-shadow(0 0 8px ${leaf.color})` }} />
                       <line x1={paddedX} y1={paddedY} 
-                            x2={paddedX} y2={paddedY + 30} 
-                            stroke={leaf.color} strokeWidth="10" strokeLinecap="round" />
+                            x2={paddedX} y2={paddedY + 40} 
+                            stroke={leaf.color} strokeWidth="14" strokeLinecap="round"
+                            style={{ filter: `drop-shadow(0 0 8px ${leaf.color})` }} />
                       
-                      {/* Bottom right corners */}
+                      {/* Bottom right corners - EXTRA THICK */}
                       <line x1={paddedX + paddedWidth} y1={paddedY + paddedHeight} 
-                            x2={paddedX + paddedWidth - 30} y2={paddedY + paddedHeight} 
-                            stroke={leaf.color} strokeWidth="10" strokeLinecap="round" />
+                            x2={paddedX + paddedWidth - 40} y2={paddedY + paddedHeight} 
+                            stroke={leaf.color} strokeWidth="14" strokeLinecap="round"
+                            style={{ filter: `drop-shadow(0 0 8px ${leaf.color})` }} />
                       <line x1={paddedX + paddedWidth} y1={paddedY + paddedHeight} 
-                            x2={paddedX + paddedWidth} y2={paddedY + paddedHeight - 30} 
-                            stroke={leaf.color} strokeWidth="10" strokeLinecap="round" />
+                            x2={paddedX + paddedWidth} y2={paddedY + paddedHeight - 40} 
+                            stroke={leaf.color} strokeWidth="14" strokeLinecap="round"
+                            style={{ filter: `drop-shadow(0 0 8px ${leaf.color})` }} />
                       
-                      {/* BIGGER Label with health status */}
-                      <g transform={`translate(${paddedX + 15}, ${paddedY - 15})`}>
+                      {/* BIGGER Label with health status - GLOWING */}
+                      <g transform={`translate(${paddedX + 20}, ${paddedY - 20})`}>
                         <rect
-                          x="-8"
-                          y="-32"
-                          width={Math.max(150, (leaf.label.length + statusText.length) * 8 + 40)}
-                          height="38"
+                          x="-10"
+                          y="-36"
+                          width={Math.max(180, (leaf.label.length + statusText.length) * 10 + 50)}
+                          height="44"
                           fill={leaf.color}
-                          rx="16"
-                          style={{ filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.4))' }}
+                          rx="20"
+                          style={{ filter: `drop-shadow(0 4px 12px rgba(0,0,0,0.6)) drop-shadow(0 0 15px ${leaf.color})` }}
                         />
                         <text
-                          x="0"
+                          x="5"
                           y="-8"
                           fill="white"
-                          fontSize="20"
+                          fontSize="24"
                           fontWeight="bold"
                           fontFamily="Arial, sans-serif"
-                          style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}
+                          style={{ textShadow: '3px 3px 6px rgba(0,0,0,0.8)' }}
                         >
                           {leaf.label} - {statusText}
                         </text>
