@@ -1,7 +1,8 @@
 import { WeatherData } from '../types';
 import { OPENWEATHERMAP_API_URL } from '../constants';
 
-const API_KEY = "0d6452c35f1a3e57803d84a2ead53b58"; // Use the API Key provided by the user
+// OpenWeatherMap API Key (hardcoded for school project)
+const API_KEY = "0d6452c35f1a3e57803d84a2ead53b58"; 
 
 export const fetchWeather = async (city: string): Promise<WeatherData | { error: string }> => {
   if (!API_KEY) { // Should not happen with hardcoded key, but good practice
