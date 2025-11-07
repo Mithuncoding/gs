@@ -15,9 +15,10 @@ export default defineConfig(({ mode }) => {
         }
       },
       server: {
-        proxy: {
-          '/api': 'http://localhost:5001'
-        }
+        // Proxy disabled - using Web Speech API and Google Translate API directly
+        // proxy: {
+        //   '/api': 'http://localhost:5001'
+        // }
       }
     };
 });

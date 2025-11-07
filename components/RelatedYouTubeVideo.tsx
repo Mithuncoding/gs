@@ -58,33 +58,9 @@ const fetchYouTubeApiVideo = async (query: string, apiKey: string) => {
   return null;
 };
 
-const fetchOEmbedVideo = async (query: string) => {
-  try {
-    // We can't search directly with oEmbed, so we'll still try to find a video ID
-    // by fetching the search page but we expect CORS issues here. This is mostly a placeholder
-    // or would require a server-side proxy to avoid CORS.
-    // A better fallback would be to link to the YouTube search.
-    // Keeping this for now as it was the previous logic, but it is expected to fail CORS.
-    const res = await fetch(`https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`);
-    const text = await res.text();
-    const match = text.match(/\"videoId\":\"([^"]+)\"/);
-    if (match && match[1]) {
-      const videoId = match[1];
-      const oembedRes = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(`https://www.youtube.com/watch?v=${videoId}`)}&format=json`);
-      if (oembedRes.ok) {
-        const oembed = await oembedRes.json();
-        console.log('[YouTube oEmbed Fallback] Query:', query, 'OEmbed:', oembed); // Debug log
-        return {
-          videoId: videoId,
-          title: oembed.title,
-          author_name: oembed.author_name,
-          thumbnail_url: oembed.thumbnail_url,
-        };
-      }
-    }
-  } catch (e) {
-    console.error('[YouTube oEmbed Fallback] Error:', e);
-  }
+const fetchOEmbedVideo = async (_query: string) => {
+  // CORS prevention: Skip the search page fetch entirely
+  // Instead, return null and let the component show a search link
   return null;
 };
 
@@ -221,10 +197,26 @@ const RelatedYouTubeVideo: React.FC<RelatedYouTubeVideoProps> = ({ plantName, di
     );
   }
   return (
-    <div className="w-full max-w-2xl mx-auto rounded-xl overflow-hidden shadow-lg bg-white border border-green-200 animate-fade-in flex flex-col items-center">
-      <div className="p-6 text-center">
-        <div className="text-red-500 text-sm mb-2">{error || 'No playable video could be embedded automatically.'}</div>
-        <a href={searchUrl} target="_blank" rel="noopener noreferrer" className="inline-block px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition-colors font-semibold">See related videos on YouTube</a>
+    <div className="w-full max-w-2xl mx-auto rounded-xl overflow-hidden shadow-lg bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300 animate-fade-in">
+      <div className="p-8 text-center">
+        <div className="text-6xl mb-4">📺</div>
+        <h3 className="text-xl font-bold text-gray-800 mb-3">
+          {plantName} {diseaseName && diseaseName !== 'N/A' ? `- ${diseaseName}` : ''} Care Videos
+        </h3>
+        <p className="text-gray-600 mb-6">
+          Watch helpful care videos and tutorials on YouTube
+        </p>
+        <a 
+          href={searchUrl} 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl shadow-lg hover:from-red-700 hover:to-red-800 transition-all font-bold text-lg"
+        >
+          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+          </svg>
+          Search on YouTube
+        </a>
       </div>
     </div>
   );
