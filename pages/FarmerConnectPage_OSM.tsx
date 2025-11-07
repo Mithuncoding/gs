@@ -13,6 +13,32 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
+// Custom farmer icon
+const farmerIcon = L.icon({
+  iconUrl: 'data:image/svg+xml;base64,' + btoa(`
+    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+      <circle cx="20" cy="20" r="18" fill="#22c55e" stroke="#fff" stroke-width="3"/>
+      <text x="20" y="28" font-size="20" text-anchor="middle" fill="#fff">🌾</text>
+    </svg>
+  `),
+  iconSize: [40, 40],
+  iconAnchor: [20, 40],
+  popupAnchor: [0, -40]
+});
+
+// Custom user location icon
+const userIcon = L.icon({
+  iconUrl: 'data:image/svg+xml;base64,' + btoa(`
+    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+      <circle cx="20" cy="20" r="18" fill="#3b82f6" stroke="#fff" stroke-width="3"/>
+      <text x="20" y="28" font-size="20" text-anchor="middle" fill="#fff">📍</text>
+    </svg>
+  `),
+  iconSize: [40, 40],
+  iconAnchor: [20, 40],
+  popupAnchor: [0, -40]
+});
+
 interface FarmerLocation {
   id: number;
   name: string;
@@ -26,13 +52,34 @@ interface FarmerLocation {
   productsKn: string;
 }
 
-// Sample farmer locations in Karnataka
+// Farmer locations near Kengeri, Bangalore (SJBIT area)
 const farmerLocations: FarmerLocation[] = [
-  { id: 1, name: "Manjunath Farm", nameKn: "ಮಂಜುನಾಥ ಫಾರ್ಮ್", type: "Organic Vegetables", typeKn: "ಸಾವಯವ ತರಕಾರಿಗಳು", lat: 12.9716, lng: 77.5946, contact: "9876543210", products: "Tomato, Onion, Potato", productsKn: "ಟೊಮೇಟೊ, ಈರುಳ್ಳಿ, ಆಲೂಗಡ್ಡೆ" },
-  { id: 2, name: "Krishna Dairy", nameKn: "ಕೃಷ್ಣ ಡೈರಿ", type: "Dairy Products", typeKn: "ಡೈರಿ ಉತ್ಪನ್ನಗಳು", lat: 12.9141, lng: 77.5814, contact: "9876543211", products: "Milk, Curd, Ghee", productsKn: "ಹಾಲು, ಮೊಸರು, ತುಪ್ಪ" },
-  { id: 3, name: "Shivappa's Fruits", nameKn: "ಶಿವಪ್ಪನ ಹಣ್ಣುಗಳು", type: "Fresh Fruits", typeKn: "ತಾಜಾ ಹಣ್ಣುಗಳು", lat: 13.0339, lng: 77.5973, contact: "9876543212", products: "Mango, Banana, Papaya", productsKn: "ಮಾವಿನ ಹಣ್ಣು, ಬಾಳೆಹಣ್ಣು, ಪಪ್ಪಾಯ" },
-  { id: 4, name: "Lakshmi Grains", nameKn: "ಲಕ್ಷ್ಮೀ ಧಾನ್ಯಗಳು", type: "Grains & Pulses", typeKn: "ಧಾನ್ಯ ಮತ್ತು ದಾಲ್", lat: 13.0057, lng: 77.5647, contact: "9876543213", products: "Rice, Wheat, Dal", productsKn: "ಅಕ್ಕಿ, ಗೋಧಿ, ದಾಲ್" },
-  { id: 5, name: "Ravi's Flowers", nameKn: "ರವಿಯ ಹೂವುಗಳು", type: "Flowers", typeKn: "ಹೂವುಗಳು", lat: 12.9599, lng: 77.7040, contact: "9876543214", products: "Rose, Jasmine, Marigold", productsKn: "ಗುಲಾಬಿ, ಮಲ್ಲಿಗೆ, ಶೆವಂತಿಗೆ" }
+  // Kengeri area farmers
+  { id: 1, name: "Manjunath Organic Farm", nameKn: "ಮಂಜುನಾಥ ಸಾವಯವ ಫಾರ್ಮ್", type: "Organic Vegetables", typeKn: "ಸಾವಯವ ತರಕಾರಿಗಳು", lat: 12.9088, lng: 77.4854, contact: "9876543210", products: "Tomato, Onion, Potato, Carrot", productsKn: "ಟೊಮೇಟೊ, ಈರುಳ್ಳಿ, ಆಲೂಗಡ್ಡೆ, ಕ್ಯಾರೆಟ್" },
+  { id: 2, name: "Krishna Dairy Farm", nameKn: "ಕೃಷ್ಣ ಡೈರಿ ಫಾರ್ಮ್", type: "Dairy Products", typeKn: "ಡೈರಿ ಉತ್ಪನ್ನಗಳು", lat: 12.9156, lng: 77.4890, contact: "9876543211", products: "Fresh Milk, Curd, Ghee, Paneer", productsKn: "ತಾಜಾ ಹಾಲು, ಮೊಸರು, ತುಪ್ಪ, ಪನೀರ್" },
+  { id: 3, name: "Shivappa's Fruit Garden", nameKn: "ಶಿವಪ್ಪನ ಹಣ್ಣಿನ ತೋಟ", type: "Fresh Fruits", typeKn: "ತಾಜಾ ಹಣ್ಣುಗಳು", lat: 12.9045, lng: 77.4920, contact: "9876543212", products: "Mango, Banana, Papaya, Guava", productsKn: "ಮಾವಿನ ಹಣ್ಣು, ಬಾಳೆಹಣ್ಣು, ಪಪ್ಪಾಯ, ಪೇರಲ" },
+  { id: 4, name: "Lakshmi Grains & Pulses", nameKn: "ಲಕ್ಷ್ಮೀ ಧಾನ್ಯ ಮತ್ತು ದಾಲ್", type: "Grains & Pulses", typeKn: "ಧಾನ್ಯ ಮತ್ತು ದಾಲ್", lat: 12.9120, lng: 77.4950, contact: "9876543213", products: "Rice, Wheat, Dal, Ragi", productsKn: "ಅಕ್ಕಿ, ಗೋಧಿ, ದಾಲ್, ರಾಗಿ" },
+  { id: 5, name: "Ravi's Flower Market", nameKn: "ರವಿಯ ಹೂವಿನ ಮಾರುಕಟ್ಟೆ", type: "Fresh Flowers", typeKn: "ತಾಜಾ ಹೂವುಗಳು", lat: 12.9065, lng: 77.4800, contact: "9876543214", products: "Rose, Jasmine, Marigold, Chrysanthemum", productsKn: "ಗುಲಾಬಿ, ಮಲ್ಲಿಗೆ, ಶೆವಂತಿಗೆ, ಸೇವಂತಿಗೆ" },
+  
+  // Near Ullal & RR Nagar
+  { id: 6, name: "Nagaraj Vegetable Farm", nameKn: "ನಾಗರಾಜ್ ತರಕಾರಿ ತೋಟ", type: "Seasonal Vegetables", typeKn: "ಕಾಲೋಚಿತ ತರಕಾರಿಗಳು", lat: 12.9200, lng: 77.4920, contact: "9876543215", products: "Beans, Peas, Cabbage, Cauliflower", productsKn: "ಹುರುಳಿಕಾಯಿ, ಬಟಾಣಿ, ಎಲೆಕೋಸು, ಹೂಕೋಸು" },
+  { id: 7, name: "Venkatesh Chicken Farm", nameKn: "ವೆಂಕಟೇಶ್ ಕೋಳಿ ಫಾರ್ಮ್", type: "Poultry & Eggs", typeKn: "ಕೋಳಿ ಮತ್ತು ಮೊಟ್ಟೆಗಳು", lat: 12.9180, lng: 77.5000, contact: "9876543216", products: "Fresh Eggs, Country Chicken", productsKn: "ತಾಜಾ ಮೊಟ್ಟೆಗಳು, ನಾಟಿ ಕೋಳಿ" },
+  { id: 8, name: "Suresh Coconut Grove", nameKn: "ಸುರೇಶ್ ತೆಂಗಿನ ತೋಪು", type: "Coconut Products", typeKn: "ತೆಂಗಿನಕಾಯಿ ಉತ್ಪನ್ನಗಳು", lat: 12.9000, lng: 77.4880, contact: "9876543217", products: "Coconut, Coconut Oil, Copra", productsKn: "ತೆಂಗಿನಕಾಯಿ, ತೆಂಗಿನ ಎಣ್ಣೆ, ಕೊಪ್ರಾ" },
+  
+  // Towards Mysore Road
+  { id: 9, name: "Ramesh Spice Farm", nameKn: "ರಮೇಶ್ ಮಸಾಲೆ ತೋಟ", type: "Spices & Herbs", typeKn: "ಮಸಾಲೆಗಳು ಮತ್ತು ಗಿಡಮೂಲಿಕೆಗಳು", lat: 12.9010, lng: 77.4760, contact: "9876543218", products: "Turmeric, Chili, Coriander, Curry Leaves", productsKn: "ಅರಿಶಿನ, ಮೆಣಸಿನಕಾಯಿ, ಕೊತ್ತಂಬರಿ, ಕರಿಬೇವು" },
+  { id: 10, name: "Gowda's Green Farm", nameKn: "ಗೌಡರ ಹಸಿರು ತೋಟ", type: "Leafy Vegetables", typeKn: "ಎಲೆಕೋಸು ತರಕಾರಿಗಳು", lat: 12.8980, lng: 77.4820, contact: "9876543219", products: "Spinach, Fenugreek, Mint, Coriander", productsKn: "ಪಾಲಕ್, ಮೆಂತೆ, ಪುದೀನ, ಕೊತ್ತಂಬರಿ" },
+  
+  // Near Rajarajeshwari Nagar
+  { id: 11, name: "Basavaraj Banana Farm", nameKn: "ಬಸವರಾಜ್ ಬಾಳೆ ತೋಟ", type: "Banana Plantation", typeKn: "ಬಾಳೆ ತೋಟ", lat: 12.9220, lng: 77.5050, contact: "9876543220", products: "Banana, Plantain, Banana Flowers", productsKn: "ಬಾಳೆಹಣ್ಣು, ನೇಂತ್ರ, ಬಾಳೆ ಹೂವು" },
+  { id: 12, name: "Savitha Nursery", nameKn: "ಸವಿತಾ ನರ್ಸರಿ", type: "Plants & Seeds", typeKn: "ಸಸ್ಯಗಳು ಮತ್ತು ಬೀಜಗಳು", lat: 12.9250, lng: 77.5020, contact: "9876543221", products: "Saplings, Seeds, Fertilizers", productsKn: "ಸಸಿಗಳು, ಬೀಜಗಳು, ಗೊಬ್ಬರಗಳು" },
+  
+  // Towards Magadi Road
+  { id: 13, name: "Kumar Sugarcane Farm", nameKn: "ಕುಮಾರ್ ಕಬ್ಬಿನ ತೋಟ", type: "Sugarcane & Jaggery", typeKn: "ಕಬ್ಬು ಮತ್ತು ಬೆಲ್ಲ", lat: 12.9140, lng: 77.4700, contact: "9876543222", products: "Sugarcane, Jaggery, Sugarcane Juice", productsKn: "ಕಬ್ಬು, ಬೆಲ್ಲ, ಕಬ್ಬಿನ ರಸ" },
+  { id: 14, name: "Prakash Mushroom Farm", nameKn: "ಪ್ರಕಾಶ್ ಅಣಬೆ ತೋಟ", type: "Mushroom Cultivation", typeKn: "ಅಣಬೆ ಕೃಷಿ", lat: 12.9100, lng: 77.4750, contact: "9876543223", products: "Button Mushroom, Oyster Mushroom", productsKn: "ಬಟನ್ ಅಣಬೆ, ಆಯ್ಸ್ಟರ್ ಅಣಬೆ" },
+  
+  // Near Nagasandra
+  { id: 15, name: "Anand Hydroponics", nameKn: "ಅನಂದ್ ಹೈಡ್ರೋಪಾನಿಕ್ಸ್", type: "Hydroponic Vegetables", typeKn: "ಹೈಡ್ರೋಪಾನಿಕ್ ತರಕಾರಿಗಳು", lat: 12.9300, lng: 77.4850, contact: "9876543224", products: "Lettuce, Tomato, Cucumber, Bell Pepper", productsKn: "ಲೆಟಿಸ್, ಟೊಮೇಟೊ, ಸೌತೆಕಾಯಿ, ಕ್ಯಾಪ್ಸಿಕಂ" }
 ];
 
 // Component to recenter map
@@ -46,7 +93,7 @@ function RecenterMap({ center }: { center: [number, number] }) {
 
 const FarmerConnectPage: React.FC = () => {
   const { language } = useLanguage();
-  const [userLocation, setUserLocation] = useState<[number, number]>([12.9716, 77.5946]); // Bangalore default
+  const [userLocation, setUserLocation] = useState<[number, number]>([12.9088, 77.4854]); // Kengeri, Bangalore (SJBIT area)
   const [selectedFarmer, setSelectedFarmer] = useState<FarmerLocation | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -133,24 +180,26 @@ const FarmerConnectPage: React.FC = () => {
           </div>
         </Card>
 
-        {/* Map */}
-        <Card className="mb-4 overflow-hidden">
-          <div style={{ height: '400px', width: '100%' }}>
+        {/* Map - HUGE & FULL SCREEN */}
+        <Card className="mb-6 overflow-hidden shadow-2xl">
+          <div className="h-[600px] md:h-[700px] lg:h-[800px] w-full">
             <MapContainer
               center={userLocation}
-              zoom={13}
+              zoom={14}
               style={{ height: '100%', width: '100%' }}
+              scrollWheelZoom={true}
             >
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                maxZoom={19}
               />
               <RecenterMap center={userLocation} />
               
               {/* User location marker */}
-              <Marker position={userLocation}>
+              <Marker position={userLocation} icon={userIcon}>
                 <Popup>
-                  <div className="text-center font-semibold">
+                  <div className="text-center font-semibold text-lg">
                     📍 {text.myLocation}
                   </div>
                 </Popup>
@@ -161,23 +210,28 @@ const FarmerConnectPage: React.FC = () => {
                 <Marker
                   key={farmer.id}
                   position={[farmer.lat, farmer.lng]}
+                  icon={farmerIcon}
                   eventHandlers={{
                     click: () => setSelectedFarmer(farmer)
                   }}
                 >
                   <Popup>
-                    <div className="text-center">
-                      <h3 className="font-bold text-lg mb-1">
+                    <div className="text-center p-2 min-w-[200px]">
+                      <div className="text-3xl mb-2">🌾</div>
+                      <h3 className="font-bold text-xl mb-2 text-green-800">
                         {language === 'kn' ? farmer.nameKn : farmer.name}
                       </h3>
-                      <p className="text-sm text-gray-600 mb-2">
+                      <p className="text-sm text-gray-700 mb-1 font-semibold bg-green-100 px-3 py-1 rounded-full">
                         {language === 'kn' ? farmer.typeKn : farmer.type}
+                      </p>
+                      <p className="text-xs text-gray-600 mb-3 mt-2">
+                        📦 {language === 'kn' ? farmer.productsKn : farmer.products}
                       </p>
                       <button
                         onClick={() => setSelectedFarmer(farmer)}
-                        className="bg-green-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-green-600"
+                        className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:from-green-600 hover:to-emerald-700 transition-all shadow-lg w-full"
                       >
-                        {language === 'kn' ? 'ವಿವರಗಳು' : 'Details'}
+                        {language === 'kn' ? '📞 ವಿವರಗಳು' : '📞 View Details'}
                       </button>
                     </div>
                   </Popup>
@@ -187,52 +241,67 @@ const FarmerConnectPage: React.FC = () => {
           </div>
         </Card>
 
-        {/* Farmer List */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredFarmers.length > 0 ? (
-            filteredFarmers.map(farmer => (
-              <Card
-                key={farmer.id}
-                className={`cursor-pointer transition-all ${
-                  selectedFarmer?.id === farmer.id ? 'ring-4 ring-green-500' : ''
-                }`}
-                onClick={() => setSelectedFarmer(farmer)}
-              >
-                <div className="p-4">
-                  <h3 className="text-xl font-bold text-green-800 mb-2">
-                    {language === 'kn' ? farmer.nameKn : farmer.name}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-2">
-                    <span className="font-semibold">{text.type}:</span>{' '}
-                    {language === 'kn' ? farmer.typeKn : farmer.type}
-                  </p>
-                  <p className="text-sm text-gray-600 mb-2">
-                    <span className="font-semibold">{text.products}:</span>{' '}
-                    {language === 'kn' ? farmer.productsKn : farmer.products}
-                  </p>
-                  <p className="text-sm text-gray-600 mb-3">
-                    <span className="font-semibold">{text.contact}:</span>{' '}
-                    <a href={`tel:${farmer.contact}`} className="text-green-600 hover:underline">
-                      {farmer.contact}
-                    </a>
-                  </p>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      getDirections(farmer);
-                    }}
-                    className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-2 px-4 rounded-lg font-bold hover:from-green-600 hover:to-emerald-700 transition-all"
-                  >
-                    🗺️ {text.getDirections}
-                  </button>
-                </div>
-              </Card>
-            ))
-          ) : (
-            <div className="col-span-full text-center py-12">
-              <p className="text-gray-500 text-lg">{text.noResults}</p>
-            </div>
-          )}
+        {/* Farmer List - HUGE CARDS */}
+        <div className="mt-8">
+          <h2 className="text-3xl font-bold text-green-800 mb-6 text-center">
+            🌾 {language === 'kn' ? 'ಎಲ್ಲಾ ರೈತರು' : 'All Farmers Near You'}
+          </h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredFarmers.length > 0 ? (
+              filteredFarmers.map(farmer => (
+                <Card
+                  key={farmer.id}
+                  className={`cursor-pointer transition-all transform hover:scale-105 hover:shadow-2xl ${
+                    selectedFarmer?.id === farmer.id ? 'ring-4 ring-green-500 shadow-2xl scale-105' : ''
+                  }`}
+                  onClick={() => setSelectedFarmer(farmer)}
+                >
+                  <div className="p-6 bg-gradient-to-br from-green-50 to-emerald-50">
+                    <div className="text-5xl mb-4 text-center">🌾</div>
+                    <h3 className="text-2xl font-bold text-green-800 mb-3 text-center">
+                      {language === 'kn' ? farmer.nameKn : farmer.name}
+                    </h3>
+                    <div className="bg-white rounded-lg p-4 mb-4 shadow-inner">
+                      <p className="text-base text-gray-700 mb-3 flex items-center">
+                        <span className="font-bold text-green-700 mr-2">🏷️ {text.type}:</span>
+                        <span className="bg-green-100 px-3 py-1 rounded-full text-sm font-semibold">
+                          {language === 'kn' ? farmer.typeKn : farmer.type}
+                        </span>
+                      </p>
+                      <p className="text-sm text-gray-700 mb-3 flex items-start">
+                        <span className="font-bold text-green-700 mr-2 mt-1">📦 {text.products}:</span>
+                        <span className="flex-1">{language === 'kn' ? farmer.productsKn : farmer.products}</span>
+                      </p>
+                      <p className="text-base text-gray-700 mb-0 flex items-center">
+                        <span className="font-bold text-green-700 mr-2">📞 {text.contact}:</span>
+                        <a 
+                          href={`tel:${farmer.contact}`} 
+                          className="text-blue-600 hover:underline font-semibold"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {farmer.contact}
+                        </a>
+                      </p>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        getDirections(farmer);
+                      }}
+                      className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 px-6 rounded-xl font-bold text-lg hover:from-green-600 hover:to-emerald-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                    >
+                      🗺️ {text.getDirections}
+                    </button>
+                  </div>
+                </Card>
+              ))
+            ) : (
+              <div className="col-span-full text-center py-16">
+                <div className="text-6xl mb-4">🔍</div>
+                <p className="text-gray-500 text-2xl font-semibold">{text.noResults}</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
