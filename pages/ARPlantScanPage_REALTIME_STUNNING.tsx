@@ -151,7 +151,7 @@ const ARPlantScanPage_REALTIME_STUNNING: React.FC = () => {
     };
   }, []);
 
-  // Advanced leaf detection algorithm
+  // Advanced leaf detection algorithm - MORE SENSITIVE
   const detectLeaves = useCallback((canvas: HTMLCanvasElement, video: HTMLVideoElement) => {
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx || !video.videoWidth || !video.videoHeight) return [];
@@ -165,11 +165,11 @@ const ARPlantScanPage_REALTIME_STUNNING: React.FC = () => {
     
     const regions: { x: number; y: number; width: number; height: number; pixels: number; avgR: number; avgG: number; avgB: number }[] = [];
     const visited = new Set<string>();
-    const threshold = 30;
+    const threshold = 15; // REDUCED threshold for better detection
 
-    // Find green regions using flood fill
-    for (let y = 0; y < canvas.height; y += 10) {
-      for (let x = 0; x < canvas.width; x += 10) {
+    // Find green regions using flood fill - MORE SENSITIVE
+    for (let y = 0; y < canvas.height; y += 8) { // Smaller step for better coverage
+      for (let x = 0; x < canvas.width; x += 8) {
         const key = `${x},${y}`;
         if (visited.has(key)) continue;
 
@@ -178,10 +178,14 @@ const ARPlantScanPage_REALTIME_STUNNING: React.FC = () => {
         const g = data[i + 1];
         const b = data[i + 2];
 
-        // Enhanced green detection for leaves
-        if (g > r + threshold && g > b + threshold && g > 60 && g < 200) {
+        // MUCH MORE SENSITIVE green detection - detects dark green leaves too
+        const isGreenish = (g > r + threshold && g > b + 5) || // Standard green
+                          (g > 40 && g > r && g > b) || // Dark green
+                          (g > 50 && r < 150 && b < 150); // Any greenish color
+        
+        if (isGreenish) {
           const region = floodFillRegion(x, y, data, canvas.width, canvas.height, visited);
-          if (region.pixels > 5000) { // Minimum leaf size
+          if (region.pixels > 2000) { // REDUCED minimum leaf size
             regions.push(region);
           }
         }
@@ -196,11 +200,11 @@ const ARPlantScanPage_REALTIME_STUNNING: React.FC = () => {
       let color: string;
       
       // Health determination logic
-      if (avgG > avgR + 30 && avgG > avgB + 20) {
+      if (avgG > avgR + 20 && avgG > avgB + 15) {
         // Bright green = healthy
         healthStatus = 'healthy';
         color = '#10B981'; // Green
-      } else if (avgR > avgG - 20 || avgB > avgG - 20) {
+      } else if (avgR > avgG - 15 || avgB > avgG - 15) {
         // Brownish/yellowish = diseased
         healthStatus = 'diseased';
         color = '#EF4444'; // Red
@@ -223,7 +227,7 @@ const ARPlantScanPage_REALTIME_STUNNING: React.FC = () => {
     });
   }, [language]);
 
-  // Flood fill helper
+  // Flood fill helper - MORE SENSITIVE
   const floodFillRegion = (
     startX: number,
     startY: number,
@@ -236,9 +240,9 @@ const ARPlantScanPage_REALTIME_STUNNING: React.FC = () => {
     let pixels = 0;
     let sumR = 0, sumG = 0, sumB = 0;
     const queue = [[startX, startY]];
-    const threshold = 30;
+    const threshold = 15; // REDUCED for better detection
 
-    while (queue.length > 0) {
+    while (queue.length > 0 && pixels < 50000) { // Limit to prevent slowdown
       const [x, y] = queue.pop()!;
       const key = `${x},${y}`;
       
@@ -249,7 +253,12 @@ const ARPlantScanPage_REALTIME_STUNNING: React.FC = () => {
       const g = data[i + 1];
       const b = data[i + 2];
 
-      if (!(g > r + threshold && g > b + threshold && g > 60 && g < 200)) continue;
+      // MORE SENSITIVE green detection
+      const isGreenish = (g > r + threshold && g > b + 5) || 
+                        (g > 40 && g > r && g > b) || 
+                        (g > 50 && r < 150 && b < 150);
+      
+      if (!isGreenish) continue;
 
       visited.add(key);
       pixels++;
@@ -262,9 +271,9 @@ const ARPlantScanPage_REALTIME_STUNNING: React.FC = () => {
       minY = Math.min(minY, y);
       maxY = Math.max(maxY, y);
 
-      // Add neighbors (every 5 pixels to speed up)
-      if (pixels % 5 === 0) {
-        queue.push([x + 5, y], [x - 5, y], [x, y + 5], [x, y - 5]);
+      // Add neighbors (every 4 pixels to speed up while maintaining accuracy)
+      if (pixels % 4 === 0) {
+        queue.push([x + 4, y], [x - 4, y], [x, y + 4], [x, y - 4]);
       }
     }
 
@@ -430,22 +439,92 @@ const ARPlantScanPage_REALTIME_STUNNING: React.FC = () => {
     };
   };
 
-  // Create offline analysis
+  // Create offline analysis - IMPROVED with actual color analysis
   const createOfflineAnalysis = (): DiseaseAnalysis => {
+    // Analyze the captured image for basic health assessment
+    let severity: 'healthy' | 'mild' | 'moderate' | 'severe' | 'critical' = 'moderate';
+    let diseaseName = language === 'kn' ? 'ಆಫ್‌ಲೈನ್ ವಿಶ್ಲೇಷಣೆ' : 'Offline Analysis';
+    
+    // If we have detected leaves with health status, use that
+    if (detectedLeaves.length > 0) {
+      const diseased = detectedLeaves.filter(l => l.healthStatus === 'diseased').length;
+      const moderate = detectedLeaves.filter(l => l.healthStatus === 'moderate').length;
+      const healthy = detectedLeaves.filter(l => l.healthStatus === 'healthy').length;
+      
+      if (diseased > 0) {
+        severity = 'severe';
+        diseaseName = language === 'kn' 
+          ? 'ರೋಗಗ್ರಸ್ತ ಎಲೆಗಳು ಪತ್ತೆಯಾಗಿವೆ' 
+          : 'Diseased Leaves Detected';
+      } else if (moderate > 0) {
+        severity = 'moderate';
+        diseaseName = language === 'kn' 
+          ? 'ಮಧ್ಯಮ ಸ್ಥಿತಿ - ಗಮನ ಅಗತ್ಯ' 
+          : 'Moderate Condition - Attention Needed';
+      } else if (healthy > 0) {
+        severity = 'mild';
+        diseaseName = language === 'kn' 
+          ? 'ಸಸ್ಯ ಆರೋಗ್ಯಕರವಾಗಿದೆ' 
+          : 'Plant Appears Healthy';
+      }
+    }
+    
     return {
-      diseaseName: language === 'kn' ? 'ಆಫ್‌ಲೈನ್ ಮೋಡ್ - ಮೂಲ ವಿಶ್ಲೇಷಣೆ' : 'Offline Mode - Basic Analysis',
-      confidence: 60,
-      severity: 'moderate',
-      plantType: language === 'kn' ? 'ಸಸ್ಯ' : 'Plant',
+      diseaseName,
+      confidence: 65,
+      severity,
+      plantType: language === 'kn' ? 'ಎಲೆ ಸಸ್ಯ' : 'Leafy Plant',
       affectedArea: language === 'kn' ? 'ಎಲೆಗಳು' : 'Leaves',
-      symptoms: [language === 'kn' ? 'ಬಣ್ಣ ಬದಲಾವಣೆ ಪತ್ತೆಯಾಗಿದೆ' : 'Color changes detected'],
-      causes: [language === 'kn' ? 'ಆನ್‌ಲೈನ್ ವಿಶ್ಲೇಷಣೆಗಾಗಿ ಇಂಟರ್ನೆಟ್ ಸಂಪರ್ಕಿಸಿ' : 'Connect to internet for detailed analysis'],
-      treatment: [language === 'kn' ? 'ಸಂಪೂರ್ಣ ರೋಗನಿರ್ಣಯಕ್ಕಾಗಿ ಆನ್‌ಲೈನ್‌ಗೆ ಸಂಪರ್ಕಿಸಿ' : 'Connect online for full diagnosis'],
-      prevention: [language === 'kn' ? 'ಸಸ್ಯಗಳನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಿ' : 'Monitor plants regularly'],
-      organicSolutions: [language === 'kn' ? 'ಸಾವಯವ ಪರಿಹಾರಗಳು ಆನ್‌ಲೈನ್‌ನಲ್ಲಿ ಲಭ್ಯ' : 'Organic solutions available online'],
-      chemicalSolutions: [language === 'kn' ? 'ರಾಸಾಯನಿಕ ಪರಿಹಾರಗಳು ಆನ್‌ಲೈನ್‌ನಲ್ಲಿ ಲಭ್ಯ' : 'Chemical solutions available online'],
-      estimatedRecoveryTime: language === 'kn' ? 'ಅಜ್ಞಾತ' : 'Unknown',
-      spreadRisk: language === 'kn' ? 'ಅಜ್ಞಾತ' : 'Unknown',
+      symptoms: [
+        language === 'kn' 
+          ? 'ಆಫ್‌ಲೈನ್ ಮೋಡ್: ಮೂಲಭೂತ ಬಣ್ಣ ವಿಶ್ಲೇಷಣೆ ಮಾಡಲಾಗಿದೆ' 
+          : 'Offline Mode: Basic color analysis performed',
+        language === 'kn'
+          ? `${detectedLeaves.length} ಎಲೆಗಳು ಪತ್ತೆಯಾಗಿವೆ`
+          : `${detectedLeaves.length} leaves detected`,
+        language === 'kn'
+          ? 'ವಿವರವಾದ AI ವಿಶ್ಲೇಷಣೆಗಾಗಿ ಇಂಟರ್ನೆಟ್‌ಗೆ ಸಂಪರ್ಕಿಸಿ'
+          : 'Connect to internet for detailed AI analysis'
+      ],
+      causes: [
+        language === 'kn' 
+          ? 'ಸಂಪೂರ್ಣ ರೋಗನಿರ್ಣಯಕ್ಕಾಗಿ ಆನ್‌ಲೈನ್ ವಿಶ್ಲೇಷಣೆ ಅಗತ್ಯ' 
+          : 'Online analysis needed for complete diagnosis'
+      ],
+      treatment: [
+        language === 'kn' 
+          ? '1. ಪೀಡಿತ ಎಲೆಗಳನ್ನು ತೆಗೆದುಹಾಕಿ' 
+          : '1. Remove affected leaves',
+        language === 'kn' 
+          ? '2. ನೀರಾವರಿ ಸುಧಾರಿಸಿ' 
+          : '2. Improve watering',
+        language === 'kn' 
+          ? '3. ವಿವರವಾದ ಚಿಕಿತ್ಸೆಗಾಗಿ ಆನ್‌ಲೈನ್‌ಗೆ ಸಂಪರ್ಕಿಸಿ' 
+          : '3. Connect online for detailed treatment'
+      ],
+      prevention: [
+        language === 'kn' 
+          ? 'ನಿಯಮಿತ ತಪಾಸಣೆ ನಡೆಸಿ' 
+          : 'Regular monitoring',
+        language === 'kn' 
+          ? 'ಸರಿಯಾದ ಗಾಳಿ ಪ್ರಸರಣ' 
+          : 'Proper air circulation'
+      ],
+      organicSolutions: [
+        language === 'kn' 
+          ? 'ನೀಮ್ ತೈಲ ಸಿಂಪಡಿಸಿ' 
+          : 'Neem oil spray',
+        language === 'kn' 
+          ? 'ಸಾವಯವ ಗೊಬ್ಬರ ಬಳಸಿ' 
+          : 'Use organic fertilizer'
+      ],
+      chemicalSolutions: [
+        language === 'kn' 
+          ? 'ಆನ್‌ಲೈನ್ ನಿರ್ದಿಷ್ಟ ಶಿಫಾರಸುಗಳಿಗಾಗಿ' 
+          : 'For specific recommendations, connect online'
+      ],
+      estimatedRecoveryTime: language === 'kn' ? '1-2 ವಾರಗಳು' : '1-2 weeks',
+      spreadRisk: language === 'kn' ? 'ಮಧ್ಯಮ' : 'Moderate',
       urgencyLevel: language === 'kn' ? 'ಮಧ್ಯಮ' : 'Moderate'
     };
   };
