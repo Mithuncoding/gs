@@ -12,7 +12,7 @@ import EncyclopediaPage from './pages/EncyclopediaPage.tsx';
 import CropInsightsPage from './pages/CropInsightsPage.tsx';
 import ScanHistoryPage from './pages/ScanHistoryPage.tsx';
 import CommunityHubPage from './pages/CommunityHubPage.tsx';
-import FarmerConnectPage from './pages/FarmerConnectPage.tsx';
+import FarmerConnectPage from './pages/FarmerConnectPage_OSM.tsx'; // OpenStreetMap version - NO API KEY needed!
 import ARPlantScanPage from './pages/ARPlantScanPage_REALTIME_STUNNING.tsx'; // Stunning Real-Time AR Disease Detection
 
 const App: React.FC = () => {

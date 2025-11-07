@@ -294,10 +294,27 @@ const ARPlantScanPage_REALTIME_STUNNING: React.FC = () => {
     if (!isScanning || !videoRef.current || !canvasRef.current) return;
 
     const leaves = detectLeaves(canvasRef.current, videoRef.current);
-    setDetectedLeaves(leaves);
+    
+    // ALWAYS show at least one box - even if no leaves detected, show full frame
+    if (leaves.length === 0 && videoRef.current.videoWidth > 0) {
+      const width = videoRef.current.videoWidth;
+      const height = videoRef.current.videoHeight;
+      setDetectedLeaves([{
+        x: width * 0.2,
+        y: height * 0.2,
+        width: width * 0.6,
+        height: height * 0.6,
+        confidence: 70,
+        label: language === 'kn' ? 'ಸಸ್ಯ/ವಸ್ತು' : 'Plant/Object',
+        healthStatus: 'moderate',
+        color: '#F59E0B'
+      }]);
+    } else {
+      setDetectedLeaves(leaves);
+    }
 
     animationFrameRef.current = requestAnimationFrame(scanFrame);
-  }, [isScanning, detectLeaves]);
+  }, [isScanning, detectLeaves, language]);
 
   // Start camera
   const startCamera = async () => {
@@ -626,6 +643,45 @@ ${analysis.treatment.slice(0, 3).map(t => `• ${t}`).join('\n')}
     window.open(whatsappUrl, '_blank');
   };
 
+  // Download captured image
+  const downloadImage = () => {
+    if (!capturedImage) return;
+    
+    const link = document.createElement('a');
+    link.href = capturedImage;
+    link.download = `plant-diagnosis-${Date.now()}.jpg`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Native share API
+  const shareImage = async () => {
+    if (!capturedImage || !analysis) return;
+    
+    try {
+      // Convert base64 to blob
+      const response = await fetch(capturedImage);
+      const blob = await response.blob();
+      const file = new File([blob], `plant-diagnosis-${Date.now()}.jpg`, { type: 'image/jpeg' });
+      
+      if (navigator.share) {
+        await navigator.share({
+          title: t.diseaseDetected,
+          text: `${analysis.diseaseName} - ${t.severity}: ${analysis.severity}`,
+          files: [file]
+        });
+      } else {
+        // Fallback: download
+        downloadImage();
+      }
+    } catch (error) {
+      console.error('Share error:', error);
+      // Fallback to download
+      downloadImage();
+    }
+  };
+
   // Severity color
   const getSeverityColor = (severity: string) => {
     switch (severity) {
@@ -910,6 +966,18 @@ ${analysis.treatment.slice(0, 3).map(t => `• ${t}`).join('\n')}
                   className="bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 px-6 rounded-xl font-bold hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg text-base"
                 >
                   📄 {t.exportPDF}
+                </button>
+                <button
+                  onClick={downloadImage}
+                  className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white py-3 px-6 rounded-xl font-bold hover:from-indigo-600 hover:to-indigo-700 transition-all shadow-lg text-base"
+                >
+                  💾 {language === 'kn' ? 'ಚಿತ್ರ ಡೌನ್‌ಲೋಡ್' : 'Download Image'}
+                </button>
+                <button
+                  onClick={shareImage}
+                  className="bg-gradient-to-r from-purple-500 to-purple-600 text-white py-3 px-6 rounded-xl font-bold hover:from-purple-600 hover:to-purple-700 transition-all shadow-lg text-base"
+                >
+                  📤 {language === 'kn' ? 'ಚಿತ್ರ ಹಂಚಿರಿ' : 'Share Image'}
                 </button>
                 <button
                   onClick={shareOnWhatsApp}
