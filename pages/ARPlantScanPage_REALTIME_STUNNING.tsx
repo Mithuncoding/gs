@@ -22,6 +22,8 @@ interface DetectedLeaf {
   height: number;
   confidence: number;
   label: string;
+  healthStatus: 'healthy' | 'moderate' | 'diseased';
+  color: string;
 }
 
 interface DiseaseAnalysis {
@@ -161,7 +163,7 @@ const ARPlantScanPage_REALTIME_STUNNING: React.FC = () => {
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
     
-    const regions: { x: number; y: number; width: number; height: number; pixels: number }[] = [];
+    const regions: { x: number; y: number; width: number; height: number; pixels: number; avgR: number; avgG: number; avgB: number }[] = [];
     const visited = new Set<string>();
     const threshold = 30;
 
@@ -186,15 +188,39 @@ const ARPlantScanPage_REALTIME_STUNNING: React.FC = () => {
       }
     }
 
-    // Convert regions to detected leaves with labels
-    return regions.slice(0, 5).map((region, idx) => ({
-      x: region.x,
-      y: region.y,
-      width: region.width,
-      height: region.height,
-      confidence: Math.min(95, 75 + Math.floor(Math.random() * 20)),
-      label: language === 'kn' ? `ಎಲೆ ${idx + 1}` : `Leaf ${idx + 1}`
-    }));
+    // Convert regions to detected leaves with health analysis
+    return regions.slice(0, 5).map((region, idx) => {
+      // Analyze leaf health based on color
+      const { avgR, avgG, avgB } = region;
+      let healthStatus: 'healthy' | 'moderate' | 'diseased';
+      let color: string;
+      
+      // Health determination logic
+      if (avgG > avgR + 30 && avgG > avgB + 20) {
+        // Bright green = healthy
+        healthStatus = 'healthy';
+        color = '#10B981'; // Green
+      } else if (avgR > avgG - 20 || avgB > avgG - 20) {
+        // Brownish/yellowish = diseased
+        healthStatus = 'diseased';
+        color = '#EF4444'; // Red
+      } else {
+        // In between = moderate
+        healthStatus = 'moderate';
+        color = '#F59E0B'; // Yellow/Orange
+      }
+
+      return {
+        x: region.x,
+        y: region.y,
+        width: region.width,
+        height: region.height,
+        confidence: Math.min(95, 75 + Math.floor(Math.random() * 20)),
+        label: language === 'kn' ? `ಎಲೆ ${idx + 1}` : `Leaf ${idx + 1}`,
+        healthStatus,
+        color
+      };
+    });
   }, [language]);
 
   // Flood fill helper
@@ -208,6 +234,7 @@ const ARPlantScanPage_REALTIME_STUNNING: React.FC = () => {
   ) => {
     let minX = startX, maxX = startX, minY = startY, maxY = startY;
     let pixels = 0;
+    let sumR = 0, sumG = 0, sumB = 0;
     const queue = [[startX, startY]];
     const threshold = 30;
 
@@ -226,6 +253,9 @@ const ARPlantScanPage_REALTIME_STUNNING: React.FC = () => {
 
       visited.add(key);
       pixels++;
+      sumR += r;
+      sumG += g;
+      sumB += b;
       
       minX = Math.min(minX, x);
       maxX = Math.max(maxX, x);
@@ -243,7 +273,10 @@ const ARPlantScanPage_REALTIME_STUNNING: React.FC = () => {
       y: minY,
       width: maxX - minX,
       height: maxY - minY,
-      pixels
+      pixels,
+      avgR: pixels > 0 ? sumR / pixels : 0,
+      avgG: pixels > 0 ? sumG / pixels : 0,
+      avgB: pixels > 0 ? sumB / pixels : 0
     };
   };
 
@@ -574,48 +607,96 @@ ${analysis.treatment.slice(0, 3).map(t => `• ${t}`).join('\n')}
                   const scaleX = (videoRef.current?.offsetWidth || 1) / (videoRef.current?.videoWidth || 1);
                   const scaleY = (videoRef.current?.offsetHeight || 1) / (videoRef.current?.videoHeight || 1);
                   
+                  // Make boxes bigger - add 20% padding
+                  const padding = 0.1;
+                  const paddedX = leaf.x * scaleX - (leaf.width * scaleX * padding);
+                  const paddedY = leaf.y * scaleY - (leaf.height * scaleY * padding);
+                  const paddedWidth = leaf.width * scaleX * (1 + 2 * padding);
+                  const paddedHeight = leaf.height * scaleY * (1 + 2 * padding);
+                  
+                  // Status text
+                  const statusText = leaf.healthStatus === 'healthy' 
+                    ? (language === 'kn' ? 'ಆರೋಗ್ಯಕರ' : 'Healthy')
+                    : leaf.healthStatus === 'moderate'
+                    ? (language === 'kn' ? 'ಮಧ್ಯಮ' : 'Moderate')
+                    : (language === 'kn' ? 'ರೋಗಗ್ರಸ್ತ' : 'Diseased');
+                  
                   return (
                     <g key={idx}>
-                      {/* Thick green box - 5px stroke */}
+                      {/* THICK colored box - 8px stroke for mobile visibility */}
                       <rect
-                        x={leaf.x * scaleX}
-                        y={leaf.y * scaleY}
-                        width={leaf.width * scaleX}
-                        height={leaf.height * scaleY}
+                        x={paddedX}
+                        y={paddedY}
+                        width={paddedWidth}
+                        height={paddedHeight}
                         fill="none"
-                        stroke="#10B981"
-                        strokeWidth="5"
-                        rx="8"
+                        stroke={leaf.color}
+                        strokeWidth="8"
+                        rx="12"
                         className="animate-pulse"
+                        style={{ filter: 'drop-shadow(0 0 6px rgba(0,0,0,0.5))' }}
                       />
                       
-                      {/* Corner markers */}
-                      <line x1={leaf.x * scaleX} y1={leaf.y * scaleY} 
-                            x2={leaf.x * scaleX + 20} y2={leaf.y * scaleY} 
-                            stroke="#10B981" strokeWidth="6" strokeLinecap="round" />
-                      <line x1={leaf.x * scaleX} y1={leaf.y * scaleY} 
-                            x2={leaf.x * scaleX} y2={leaf.y * scaleY + 20} 
-                            stroke="#10B981" strokeWidth="6" strokeLinecap="round" />
+                      {/* Corner markers - thicker */}
+                      <line x1={paddedX} y1={paddedY} 
+                            x2={paddedX + 30} y2={paddedY} 
+                            stroke={leaf.color} strokeWidth="10" strokeLinecap="round" />
+                      <line x1={paddedX} y1={paddedY} 
+                            x2={paddedX} y2={paddedY + 30} 
+                            stroke={leaf.color} strokeWidth="10" strokeLinecap="round" />
                       
-                      {/* Label with thick text */}
-                      <g transform={`translate(${leaf.x * scaleX + 10}, ${leaf.y * scaleY - 10})`}>
+                      {/* Bottom right corners */}
+                      <line x1={paddedX + paddedWidth} y1={paddedY + paddedHeight} 
+                            x2={paddedX + paddedWidth - 30} y2={paddedY + paddedHeight} 
+                            stroke={leaf.color} strokeWidth="10" strokeLinecap="round" />
+                      <line x1={paddedX + paddedWidth} y1={paddedY + paddedHeight} 
+                            x2={paddedX + paddedWidth} y2={paddedY + paddedHeight - 30} 
+                            stroke={leaf.color} strokeWidth="10" strokeLinecap="round" />
+                      
+                      {/* BIGGER Label with health status */}
+                      <g transform={`translate(${paddedX + 15}, ${paddedY - 15})`}>
                         <rect
-                          x="-5"
-                          y="-18"
-                          width={leaf.label.length * 10 + 60}
-                          height="25"
-                          fill="rgba(16, 185, 129, 0.95)"
-                          rx="12"
+                          x="-8"
+                          y="-32"
+                          width={Math.max(150, (leaf.label.length + statusText.length) * 8 + 40)}
+                          height="38"
+                          fill={leaf.color}
+                          rx="16"
+                          style={{ filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.4))' }}
                         />
                         <text
                           x="0"
+                          y="-8"
+                          fill="white"
+                          fontSize="20"
+                          fontWeight="bold"
+                          fontFamily="Arial, sans-serif"
+                          style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}
+                        >
+                          {leaf.label} - {statusText}
+                        </text>
+                      </g>
+                      
+                      {/* Confidence badge */}
+                      <g transform={`translate(${paddedX + paddedWidth - 70}, ${paddedY + paddedHeight + 30})`}>
+                        <rect
+                          x="0"
                           y="0"
+                          width="70"
+                          height="32"
+                          fill="rgba(0,0,0,0.7)"
+                          rx="16"
+                        />
+                        <text
+                          x="35"
+                          y="22"
                           fill="white"
                           fontSize="16"
                           fontWeight="bold"
+                          textAnchor="middle"
                           fontFamily="Arial, sans-serif"
                         >
-                          {leaf.label} ({leaf.confidence}%)
+                          {leaf.confidence}%
                         </text>
                       </g>
                     </g>
@@ -735,7 +816,11 @@ ${analysis.treatment.slice(0, 3).map(t => `• ${t}`).join('\n')}
                   onStopSpeaking={stopSpeaking}
                   isSpeaking={isSpeaking}
                   ttsSupported={true}
-                  display="compact"
+                  onStartListening={() => {}}
+                  onStopListening={() => {}}
+                  isListening={false}
+                  sttSupported={false}
+                  showSTT={false}
                 />
                 <button
                   onClick={exportToPDF}
